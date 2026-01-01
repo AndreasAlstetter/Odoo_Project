@@ -1,0 +1,89 @@
+# processes/production_flow.py
+
+"""
+Produktionssimulation basierend auf dem Python-Routing.
+
+Ziele:
+- Für eine Drohnenvariante das definierte Routing durchlaufen.
+- Rüst- und Laufzeiten simulieren und aufsummieren.
+- UMH-Events für MO-Start, Qualität und MO-Abschluss erzeugen und
+  in eine JSON-Datei schreiben.
+
+Nutzt:
+- processes.production_routing.get_routing
+- integration.UMHEventManager / UMHClientSimulator
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+
+from odoo_api import OdooAPI
+from core.logging_utils import info, success
+from processes.production_routing import get_routing, VariantName
+from integration.umh_events import UMHEventManager, EventType
+from integration.umh_client_sim import UMHClientSimulator
+
+
+class ProductionFlow:
+    """Simuliert Produktionsläufe für die verschiedenen Drohnenvarianten."""
+
+    def __init__(self, api: OdooAPI) -> None:
+        self.api = api
+        self.umh_manager = UMHEventManager()
+        self.umh_client = UMHClientSimulator(output_file="umh_events_production.json")
+
+    def run_production_for_variant(self, variant: VariantName, quantity: float = 1.0) -> None:
+        """
+        Simuliert den Produktionsablauf für eine Variante.
+
+        - Durchläuft alle Routing-Operationen.
+        - Summiert Rüst- und Laufzeiten.
+        - Erzeugt UMH-Events (MO gestartet, Quality-Check, MO fertig).
+        """
+        info(f"Starte Produktionssimulation für Variante '{variant}' (Menge {quantity})...")
+
+        ops = get_routing(variant)
+        total_setup = 0.0
+        total_run = 0.0
+
+        # MO-Start-Event (ohne echte MO-ID -> Dummy -1)
+        mo_start = self.umh_manager.create_mo_event(mo_id=-1, event_type=EventType.MO_STARTED)
+        self.umh_manager.queue_event(mo_start)
+
+        for op in ops:
+            info(f"Operation {op.seq}: {op.name} auf {op.workcenter_code}")
+            total_setup += op.setup_time_min
+            total_run += op.run_time_min * quantity
+
+            # Beispiel: Qualitäts-Event bei End-Qualitätskontrolle
+            if op.seq == 120:
+                q_evt = self.umh_manager.create_quality_event(
+                    product_id=-1,  # Demo: kein echtes Produkt, Fokus auf Routing
+                    stage="End-Qualitätskontrolle",
+                    result="pass",
+                    details=f"Variant={variant}, Workcenter={op.workcenter_code}, Seq={op.seq}",
+                )
+                self.umh_manager.queue_event(q_evt)
+
+        total = total_setup + total_run
+        success(
+            f"Variante '{variant}': Setup={total_setup:.1f} min, "
+            f"Laufzeit={total_run:.1f} min, Gesamt={total:.1f} min."
+        )
+
+        # MO-Abschluss-Event
+        mo_done = self.umh_manager.create_mo_event(mo_id=-1, event_type=EventType.MO_COMPLETED)
+        self.umh_manager.queue_event(mo_done)
+
+        # Events in Datei schreiben
+        events_dicts = [e.to_dict() for e in self.umh_manager.get_pending_events()]
+        self.umh_client.send_events_batch(events_dicts)
+        self.umh_client.export_to_file()
+        self.umh_manager.clear_events()
+
+    def run_demo_all_variants(self) -> None:
+        """Führt die Produktionssimulation für alle drei Varianten einmal aus."""
+        for v in ("spartan", "balance", "lightweight"):
+            self.run_production_for_variant(v, quantity=1.0)
+        success("Demo-Produktionsläufe abgeschlossen für Varianten: spartan, balance, lightweight")

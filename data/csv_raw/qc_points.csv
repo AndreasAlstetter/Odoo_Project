@@ -1,0 +1,5 @@
+qc_point_id,product_id,control_type,stage,pass_criteria
+QC001,DRONE-V1,Visual,After Assembly,No visible defects
+QC002,DRONE-V1,Functional,After Testing,All motors operational
+QC003,DRONE-V2,Visual,After Assembly,No visible defects
+QC004,DRONE-V2,Functional,After Testing,All motors operational

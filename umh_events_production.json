@@ -1,0 +1,74 @@
+[
+  {
+    "type": "mo_started",
+    "timestamp": "2026-01-01T19:28:05.000009",
+    "payload": {
+      "mo_id": -1
+    }
+  },
+  {
+    "type": "quality_check",
+    "timestamp": "2026-01-01T19:28:05.005278",
+    "payload": {
+      "product_id": -1,
+      "stage": "End-Qualitätskontrolle",
+      "result": "pass",
+      "details": "Variant=spartan, Workcenter=WC-QM-END, Seq=120"
+    }
+  },
+  {
+    "type": "mo_completed",
+    "timestamp": "2026-01-01T19:28:05.006277",
+    "payload": {
+      "mo_id": -1
+    }
+  },
+  {
+    "type": "mo_started",
+    "timestamp": "2026-01-01T19:28:05.006277",
+    "payload": {
+      "mo_id": -1
+    }
+  },
+  {
+    "type": "quality_check",
+    "timestamp": "2026-01-01T19:28:05.009284",
+    "payload": {
+      "product_id": -1,
+      "stage": "End-Qualitätskontrolle",
+      "result": "pass",
+      "details": "Variant=balance, Workcenter=WC-QM-END, Seq=120"
+    }
+  },
+  {
+    "type": "mo_completed",
+    "timestamp": "2026-01-01T19:28:05.010285",
+    "payload": {
+      "mo_id": -1
+    }
+  },
+  {
+    "type": "mo_started",
+    "timestamp": "2026-01-01T19:28:05.011279",
+    "payload": {
+      "mo_id": -1
+    }
+  },
+  {
+    "type": "quality_check",
+    "timestamp": "2026-01-01T19:28:05.014283",
+    "payload": {
+      "product_id": -1,
+      "stage": "End-Qualitätskontrolle",
+      "result": "pass",
+      "details": "Variant=lightweight, Workcenter=WC-QM-END, Seq=120"
+    }
+  },
+  {
+    "type": "mo_completed",
+    "timestamp": "2026-01-01T19:28:05.014283",
+    "payload": {
+      "mo_id": -1
+    }
+  }
+]

@@ -1,0 +1,12 @@
+code,name,category,capacity,cost_per_hour
+WC-3D,3D-Drucker,Fertigung,1,35
+WC-LC,Lasercutter,Fertigung,1,40
+WC-NACH,Nacharbeit,Fertigung,1,32
+WC-LOG,Lager / Logistik,Logistik,1,30
+WC-WTB,WT-Bestückung,Montage,1,32
+WC-LOET,Lötstation,Montage,1,38
+WC-MONT1,Montage Elektronik,Montage,1,38
+WC-MONT2,Montage Gehäuse & Rotoren,Montage,1,38
+WC-FLASH,Flashen Controller,Montage,1,40
+WC-QM-END,End-Qualitätskontrolle,Qualität,1,34
+WC-QM-TEIL,Teile-Qualitätskontrolle (Grundplatte/Füße/Haube),Qualität,1,34

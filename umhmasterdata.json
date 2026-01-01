@@ -1,0 +1,1620 @@
+{
+  "products": [
+    {
+      "umh_id": "product:7",
+      "name": "2200mAh 50C 11. 1V 24.52Wh Zeee",
+      "default_code": "15",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 18.07,
+      "active": true
+    },
+    {
+      "umh_id": "product:74",
+      "name": "Akku",
+      "default_code": "15",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.0,
+      "active": true
+    },
+    {
+      "umh_id": "product:14",
+      "name": "FS-IA10B Resiver",
+      "default_code": "16",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 17.42,
+      "active": true
+    },
+    {
+      "umh_id": "product:9",
+      "name": "Mamba F405 MK2 kpl.",
+      "default_code": "17",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 84.9,
+      "active": true
+    },
+    {
+      "umh_id": "product:13",
+      "name": "RUDOG ESC RX Cable Black 60mm)",
+      "default_code": "24",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 3.99,
+      "active": true
+    },
+    {
+      "umh_id": "product:8",
+      "name": "Anstecker an Akku (zweipolig)",
+      "default_code": "25",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.95,
+      "active": true
+    },
+    {
+      "umh_id": "product:15",
+      "name": "KARTONAGE 130MM",
+      "default_code": "54",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 2.39,
+      "active": true
+    },
+    {
+      "umh_id": "product:11",
+      "name": "Kabelverlängerung Motor (5cm)",
+      "default_code": "61",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.5,
+      "active": true
+    },
+    {
+      "umh_id": "product:12",
+      "name": "Schrumpfschlauch",
+      "default_code": "62",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.01,
+      "active": true
+    },
+    {
+      "umh_id": "product:17",
+      "name": "Motorschrauben für iFlight.Xing.2207 2",
+      "default_code": "63",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.0,
+      "active": true
+    },
+    {
+      "umh_id": "product:18",
+      "name": "Motormuttern für iFlight.Xing.2207 2",
+      "default_code": "64",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.0,
+      "active": true
+    },
+    {
+      "umh_id": "product:10",
+      "name": "XING-E Pro2207 2750kv",
+      "default_code": "66",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 16.9,
+      "active": true
+    },
+    {
+      "umh_id": "product:41",
+      "name": "Lötzinn 1.0mm 50g",
+      "default_code": "67",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.07,
+      "active": true
+    },
+    {
+      "umh_id": "product:16",
+      "name": "Papierreste",
+      "default_code": "74",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.2,
+      "active": true
+    },
+    {
+      "umh_id": "product:26",
+      "name": "HAUBE EVO2 schwarz",
+      "default_code": "V_BLACK_13",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 4.69,
+      "active": true
+    },
+    {
+      "umh_id": "product:37",
+      "name": "Fuß 35mm Spartan schwarz",
+      "default_code": "V_BLACK_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.21,
+      "active": true
+    },
+    {
+      "umh_id": "product:40",
+      "name": "Acryl Glasplatte - Weiß 1000mm*330mm*5mm (3300 cm^2)",
+      "default_code": "V_BLACK_7",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.0,
+      "active": true
+    },
+    {
+      "umh_id": "product:29",
+      "name": "Grundplatte EVO 2 Spartan schwarz",
+      "default_code": "V_BLACK_75",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 6.48,
+      "active": true
+    },
+    {
+      "umh_id": "product:49",
+      "name": "PLA Filament 3mm - Schwarz",
+      "default_code": "V_BLACK_9",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.03,
+      "active": true
+    },
+    {
+      "umh_id": "product:23",
+      "name": "HAUBE EVO2 blau",
+      "default_code": "V_BLUE_13",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 4.69,
+      "active": true
+    },
+    {
+      "umh_id": "product:34",
+      "name": "Fuß 35mm Spartan blau",
+      "default_code": "V_BLUE_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.21,
+      "active": true
+    },
+    {
+      "umh_id": "product:39",
+      "name": "Acryl Glasplatte - Weiß 1000mm*330mm*5mm (3300 cm^2)",
+      "default_code": "V_BLUE_7",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.0,
+      "active": true
+    },
+    {
+      "umh_id": "product:28",
+      "name": "Grundplatte EVO 2 Spartan blau",
+      "default_code": "V_BLUE_75",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 6.48,
+      "active": true
+    },
+    {
+      "umh_id": "product:46",
+      "name": "PLA Filament 3mm - Blau",
+      "default_code": "V_BLUE_9",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.03,
+      "active": true
+    },
+    {
+      "umh_id": "product:24",
+      "name": "HAUBE EVO2 braun",
+      "default_code": "V_BROWN_13",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 4.69,
+      "active": true
+    },
+    {
+      "umh_id": "product:35",
+      "name": "Fuß 35mm Spartan braun",
+      "default_code": "V_BROWN_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.21,
+      "active": true
+    },
+    {
+      "umh_id": "product:47",
+      "name": "PLA Filament 3mm - Braun",
+      "default_code": "V_BROWN_9",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.03,
+      "active": true
+    },
+    {
+      "umh_id": "product:71",
+      "name": "Fuß 35mm Balance schwarz",
+      "default_code": "V_B_BLACK_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.13,
+      "active": true
+    },
+    {
+      "umh_id": "product:63",
+      "name": "Grundplatte EVO 2 Balance schwarz",
+      "default_code": "V_B_BLACK_75",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 6.48,
+      "active": true
+    },
+    {
+      "umh_id": "product:68",
+      "name": "Fuß 35mm Balance blau",
+      "default_code": "V_B_BLUE_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.13,
+      "active": true
+    },
+    {
+      "umh_id": "product:62",
+      "name": "Grundplatte EVO 2 Balance blau",
+      "default_code": "V_B_BLUE_75",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 6.48,
+      "active": true
+    },
+    {
+      "umh_id": "product:69",
+      "name": "Fuß 35mm Balance braun",
+      "default_code": "V_B_BROWN_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.13,
+      "active": true
+    },
+    {
+      "umh_id": "product:67",
+      "name": "Fuß 35mm Balance grün",
+      "default_code": "V_B_GREEN_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.13,
+      "active": true
+    },
+    {
+      "umh_id": "product:70",
+      "name": "Fuß 35mm Balance orange",
+      "default_code": "V_B_ORANGE_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.13,
+      "active": true
+    },
+    {
+      "umh_id": "product:66",
+      "name": "Fuß 35mm Balance rot",
+      "default_code": "V_B_RED_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.13,
+      "active": true
+    },
+    {
+      "umh_id": "product:64",
+      "name": "Fuß 35mm Balance weiss",
+      "default_code": "V_B_WHITE_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.13,
+      "active": true
+    },
+    {
+      "umh_id": "product:61",
+      "name": "Grundplatte EVO 2 Balance weiss",
+      "default_code": "V_B_WHITE_75",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 6.48,
+      "active": true
+    },
+    {
+      "umh_id": "product:65",
+      "name": "Fuß 35mm Balance gelb",
+      "default_code": "V_B_YELLOW_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.13,
+      "active": true
+    },
+    {
+      "umh_id": "product:22",
+      "name": "HAUBE EVO2 grün",
+      "default_code": "V_GREEN_13",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 4.69,
+      "active": true
+    },
+    {
+      "umh_id": "product:33",
+      "name": "Fuß 35mm Spartan grün",
+      "default_code": "V_GREEN_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.21,
+      "active": true
+    },
+    {
+      "umh_id": "product:45",
+      "name": "PLA Filament 3mm  - Grün",
+      "default_code": "V_GREEN_9",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.03,
+      "active": true
+    },
+    {
+      "umh_id": "product:60",
+      "name": "Fuß 35mm Lightweight schwarz",
+      "default_code": "V_L_BLACK_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.11,
+      "active": true
+    },
+    {
+      "umh_id": "product:52",
+      "name": "Grundplatte EVO 2 Lightweight schwarz",
+      "default_code": "V_L_BLACK_75",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 6.48,
+      "active": true
+    },
+    {
+      "umh_id": "product:57",
+      "name": "Fuß 35mm Lightweight blau",
+      "default_code": "V_L_BLUE_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.11,
+      "active": true
+    },
+    {
+      "umh_id": "product:51",
+      "name": "Grundplatte EVO 2 Lightweight blau",
+      "default_code": "V_L_BLUE_75",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 6.48,
+      "active": true
+    },
+    {
+      "umh_id": "product:58",
+      "name": "Fuß 35mm Lightweight braun",
+      "default_code": "V_L_BROWN_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.11,
+      "active": true
+    },
+    {
+      "umh_id": "product:56",
+      "name": "Fuß 35mm Lightweight grün",
+      "default_code": "V_L_GREEN_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.11,
+      "active": true
+    },
+    {
+      "umh_id": "product:59",
+      "name": "Fuß 35mm Lightweight orange",
+      "default_code": "V_L_ORANGE_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.11,
+      "active": true
+    },
+    {
+      "umh_id": "product:55",
+      "name": "Fuß 35mm Lightweight rot",
+      "default_code": "V_L_RED_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.11,
+      "active": true
+    },
+    {
+      "umh_id": "product:53",
+      "name": "Fuß 35mm Lightweight weiss",
+      "default_code": "V_L_WHITE_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.11,
+      "active": true
+    },
+    {
+      "umh_id": "product:50",
+      "name": "Grundplatte EVO 2 Lightweight weiss",
+      "default_code": "V_L_WHITE_75",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 6.48,
+      "active": true
+    },
+    {
+      "umh_id": "product:54",
+      "name": "Fuß 35mm Lightweight gelb",
+      "default_code": "V_L_YELLOW_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.11,
+      "active": true
+    },
+    {
+      "umh_id": "product:25",
+      "name": "HAUBE EVO2 orange",
+      "default_code": "V_ORANGE_13",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 4.69,
+      "active": true
+    },
+    {
+      "umh_id": "product:36",
+      "name": "Fuß 35mm Spartan orange",
+      "default_code": "V_ORANGE_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.21,
+      "active": true
+    },
+    {
+      "umh_id": "product:48",
+      "name": "PLA Filament 3mm - Orange",
+      "default_code": "V_ORANGE_9",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.03,
+      "active": true
+    },
+    {
+      "umh_id": "product:21",
+      "name": "HAUBE EVO2 rot",
+      "default_code": "V_RED_13",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 4.69,
+      "active": true
+    },
+    {
+      "umh_id": "product:32",
+      "name": "Fuß 35mm Spartan rot",
+      "default_code": "V_RED_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.21,
+      "active": true
+    },
+    {
+      "umh_id": "product:44",
+      "name": "PLA Filament 3mm  - Rot",
+      "default_code": "V_RED_9",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.03,
+      "active": true
+    },
+    {
+      "umh_id": "product:19",
+      "name": "Haube EVO2 weiss",
+      "default_code": "V_WHITE_13",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 4.69,
+      "active": true
+    },
+    {
+      "umh_id": "product:30",
+      "name": "Fuß 35mm Spartan weiss",
+      "default_code": "V_WHITE_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.21,
+      "active": true
+    },
+    {
+      "umh_id": "product:38",
+      "name": "Acryl Glasplatte - Weiß 1000mm*330mm*5mm (3300 cm^2)",
+      "default_code": "V_WHITE_7",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.0,
+      "active": true
+    },
+    {
+      "umh_id": "product:27",
+      "name": "Grundplatte EVO 2 Spartan weiss",
+      "default_code": "V_WHITE_75",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 6.48,
+      "active": true
+    },
+    {
+      "umh_id": "product:42",
+      "name": "PLA Filament 3mm - Weiß",
+      "default_code": "V_WHITE_9",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.03,
+      "active": true
+    },
+    {
+      "umh_id": "product:20",
+      "name": "HAUBE EVO2 gelb",
+      "default_code": "V_YELLOW_13",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 4.69,
+      "active": true
+    },
+    {
+      "umh_id": "product:31",
+      "name": "Fuß 35mm Spartan gelb",
+      "default_code": "V_YELLOW_31",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.21,
+      "active": true
+    },
+    {
+      "umh_id": "product:43",
+      "name": "PLA Filament 3mm - Gelb",
+      "default_code": "V_YELLOW_9",
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.03,
+      "active": true
+    },
+    {
+      "umh_id": "product:73",
+      "name": "EVO2 Balance Drohne",
+      "default_code": false,
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.0,
+      "active": true
+    },
+    {
+      "umh_id": "product:72",
+      "name": "EVO2 Lightweight Drohne",
+      "default_code": false,
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.0,
+      "active": true
+    },
+    {
+      "umh_id": "product:6",
+      "name": "EVO2 Spartan Drohne",
+      "default_code": false,
+      "type": "consu",
+      "uom_id": [
+        1,
+        "Units"
+      ],
+      "categ_id": false,
+      "standard_price": 0.0,
+      "active": true
+    }
+  ],
+  "boms": [
+    {
+      "umh_id": "bom:1",
+      "product_tmpl_id": [
+        6,
+        "EVO2 Spartan Drohne"
+      ],
+      "product_id": [
+        6,
+        "EVO2 Spartan Drohne"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:2",
+      "product_tmpl_id": [
+        19,
+        "[V_WHITE_13] Haube EVO2 weiss"
+      ],
+      "product_id": [
+        19,
+        "[V_WHITE_13] Haube EVO2 weiss"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:3",
+      "product_tmpl_id": [
+        20,
+        "[V_YELLOW_13] HAUBE EVO2 gelb"
+      ],
+      "product_id": [
+        20,
+        "[V_YELLOW_13] HAUBE EVO2 gelb"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:4",
+      "product_tmpl_id": [
+        21,
+        "[V_RED_13] HAUBE EVO2 rot"
+      ],
+      "product_id": [
+        21,
+        "[V_RED_13] HAUBE EVO2 rot"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:5",
+      "product_tmpl_id": [
+        22,
+        "[V_GREEN_13] HAUBE EVO2 grün"
+      ],
+      "product_id": [
+        22,
+        "[V_GREEN_13] HAUBE EVO2 grün"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:6",
+      "product_tmpl_id": [
+        23,
+        "[V_BLUE_13] HAUBE EVO2 blau"
+      ],
+      "product_id": [
+        23,
+        "[V_BLUE_13] HAUBE EVO2 blau"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:7",
+      "product_tmpl_id": [
+        24,
+        "[V_BROWN_13] HAUBE EVO2 braun"
+      ],
+      "product_id": [
+        24,
+        "[V_BROWN_13] HAUBE EVO2 braun"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:8",
+      "product_tmpl_id": [
+        25,
+        "[V_ORANGE_13] HAUBE EVO2 orange"
+      ],
+      "product_id": [
+        25,
+        "[V_ORANGE_13] HAUBE EVO2 orange"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:9",
+      "product_tmpl_id": [
+        26,
+        "[V_BLACK_13] HAUBE EVO2 schwarz"
+      ],
+      "product_id": [
+        26,
+        "[V_BLACK_13] HAUBE EVO2 schwarz"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:10",
+      "product_tmpl_id": [
+        27,
+        "[V_WHITE_75] Grundplatte EVO 2 Spartan weiss"
+      ],
+      "product_id": [
+        27,
+        "[V_WHITE_75] Grundplatte EVO 2 Spartan weiss"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:11",
+      "product_tmpl_id": [
+        28,
+        "[V_BLUE_75] Grundplatte EVO 2 Spartan blau"
+      ],
+      "product_id": [
+        28,
+        "[V_BLUE_75] Grundplatte EVO 2 Spartan blau"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:12",
+      "product_tmpl_id": [
+        29,
+        "[V_BLACK_75] Grundplatte EVO 2 Spartan schwarz"
+      ],
+      "product_id": [
+        29,
+        "[V_BLACK_75] Grundplatte EVO 2 Spartan schwarz"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:13",
+      "product_tmpl_id": [
+        30,
+        "[V_WHITE_31] Fuß 35mm Spartan weiss"
+      ],
+      "product_id": [
+        30,
+        "[V_WHITE_31] Fuß 35mm Spartan weiss"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:14",
+      "product_tmpl_id": [
+        31,
+        "[V_YELLOW_31] Fuß 35mm Spartan gelb"
+      ],
+      "product_id": [
+        31,
+        "[V_YELLOW_31] Fuß 35mm Spartan gelb"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:15",
+      "product_tmpl_id": [
+        32,
+        "[V_RED_31] Fuß 35mm Spartan rot"
+      ],
+      "product_id": [
+        32,
+        "[V_RED_31] Fuß 35mm Spartan rot"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:16",
+      "product_tmpl_id": [
+        33,
+        "[V_GREEN_31] Fuß 35mm Spartan grün"
+      ],
+      "product_id": [
+        33,
+        "[V_GREEN_31] Fuß 35mm Spartan grün"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:17",
+      "product_tmpl_id": [
+        34,
+        "[V_BLUE_31] Fuß 35mm Spartan blau"
+      ],
+      "product_id": [
+        34,
+        "[V_BLUE_31] Fuß 35mm Spartan blau"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:18",
+      "product_tmpl_id": [
+        35,
+        "[V_BROWN_31] Fuß 35mm Spartan braun"
+      ],
+      "product_id": [
+        35,
+        "[V_BROWN_31] Fuß 35mm Spartan braun"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:19",
+      "product_tmpl_id": [
+        36,
+        "[V_ORANGE_31] Fuß 35mm Spartan orange"
+      ],
+      "product_id": [
+        36,
+        "[V_ORANGE_31] Fuß 35mm Spartan orange"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:20",
+      "product_tmpl_id": [
+        37,
+        "[V_BLACK_31] Fuß 35mm Spartan schwarz"
+      ],
+      "product_id": [
+        37,
+        "[V_BLACK_31] Fuß 35mm Spartan schwarz"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:21",
+      "product_tmpl_id": [
+        50,
+        "[V_L_WHITE_75] Grundplatte EVO 2 Lightweight weiss"
+      ],
+      "product_id": [
+        50,
+        "[V_L_WHITE_75] Grundplatte EVO 2 Lightweight weiss"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:22",
+      "product_tmpl_id": [
+        51,
+        "[V_L_BLUE_75] Grundplatte EVO 2 Lightweight blau"
+      ],
+      "product_id": [
+        51,
+        "[V_L_BLUE_75] Grundplatte EVO 2 Lightweight blau"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:23",
+      "product_tmpl_id": [
+        52,
+        "[V_L_BLACK_75] Grundplatte EVO 2 Lightweight schwarz"
+      ],
+      "product_id": [
+        52,
+        "[V_L_BLACK_75] Grundplatte EVO 2 Lightweight schwarz"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:24",
+      "product_tmpl_id": [
+        53,
+        "[V_L_WHITE_31] Fuß 35mm Lightweight weiss"
+      ],
+      "product_id": [
+        53,
+        "[V_L_WHITE_31] Fuß 35mm Lightweight weiss"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:25",
+      "product_tmpl_id": [
+        54,
+        "[V_L_YELLOW_31] Fuß 35mm Lightweight gelb"
+      ],
+      "product_id": [
+        54,
+        "[V_L_YELLOW_31] Fuß 35mm Lightweight gelb"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:26",
+      "product_tmpl_id": [
+        55,
+        "[V_L_RED_31] Fuß 35mm Lightweight rot"
+      ],
+      "product_id": [
+        55,
+        "[V_L_RED_31] Fuß 35mm Lightweight rot"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:27",
+      "product_tmpl_id": [
+        56,
+        "[V_L_GREEN_31] Fuß 35mm Lightweight grün"
+      ],
+      "product_id": [
+        56,
+        "[V_L_GREEN_31] Fuß 35mm Lightweight grün"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:28",
+      "product_tmpl_id": [
+        57,
+        "[V_L_BLUE_31] Fuß 35mm Lightweight blau"
+      ],
+      "product_id": [
+        57,
+        "[V_L_BLUE_31] Fuß 35mm Lightweight blau"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:29",
+      "product_tmpl_id": [
+        58,
+        "[V_L_BROWN_31] Fuß 35mm Lightweight braun"
+      ],
+      "product_id": [
+        58,
+        "[V_L_BROWN_31] Fuß 35mm Lightweight braun"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:30",
+      "product_tmpl_id": [
+        59,
+        "[V_L_ORANGE_31] Fuß 35mm Lightweight orange"
+      ],
+      "product_id": [
+        59,
+        "[V_L_ORANGE_31] Fuß 35mm Lightweight orange"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:31",
+      "product_tmpl_id": [
+        60,
+        "[V_L_BLACK_31] Fuß 35mm Lightweight schwarz"
+      ],
+      "product_id": [
+        60,
+        "[V_L_BLACK_31] Fuß 35mm Lightweight schwarz"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:32",
+      "product_tmpl_id": [
+        61,
+        "[V_B_WHITE_75] Grundplatte EVO 2 Balance weiss"
+      ],
+      "product_id": [
+        61,
+        "[V_B_WHITE_75] Grundplatte EVO 2 Balance weiss"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:33",
+      "product_tmpl_id": [
+        62,
+        "[V_B_BLUE_75] Grundplatte EVO 2 Balance blau"
+      ],
+      "product_id": [
+        62,
+        "[V_B_BLUE_75] Grundplatte EVO 2 Balance blau"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:34",
+      "product_tmpl_id": [
+        63,
+        "[V_B_BLACK_75] Grundplatte EVO 2 Balance schwarz"
+      ],
+      "product_id": [
+        63,
+        "[V_B_BLACK_75] Grundplatte EVO 2 Balance schwarz"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:35",
+      "product_tmpl_id": [
+        64,
+        "[V_B_WHITE_31] Fuß 35mm Balance weiss"
+      ],
+      "product_id": [
+        64,
+        "[V_B_WHITE_31] Fuß 35mm Balance weiss"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:36",
+      "product_tmpl_id": [
+        65,
+        "[V_B_YELLOW_31] Fuß 35mm Balance gelb"
+      ],
+      "product_id": [
+        65,
+        "[V_B_YELLOW_31] Fuß 35mm Balance gelb"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:37",
+      "product_tmpl_id": [
+        66,
+        "[V_B_RED_31] Fuß 35mm Balance rot"
+      ],
+      "product_id": [
+        66,
+        "[V_B_RED_31] Fuß 35mm Balance rot"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:38",
+      "product_tmpl_id": [
+        67,
+        "[V_B_GREEN_31] Fuß 35mm Balance grün"
+      ],
+      "product_id": [
+        67,
+        "[V_B_GREEN_31] Fuß 35mm Balance grün"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:39",
+      "product_tmpl_id": [
+        68,
+        "[V_B_BLUE_31] Fuß 35mm Balance blau"
+      ],
+      "product_id": [
+        68,
+        "[V_B_BLUE_31] Fuß 35mm Balance blau"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:40",
+      "product_tmpl_id": [
+        69,
+        "[V_B_BROWN_31] Fuß 35mm Balance braun"
+      ],
+      "product_id": [
+        69,
+        "[V_B_BROWN_31] Fuß 35mm Balance braun"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:41",
+      "product_tmpl_id": [
+        70,
+        "[V_B_ORANGE_31] Fuß 35mm Balance orange"
+      ],
+      "product_id": [
+        70,
+        "[V_B_ORANGE_31] Fuß 35mm Balance orange"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:42",
+      "product_tmpl_id": [
+        71,
+        "[V_B_BLACK_31] Fuß 35mm Balance schwarz"
+      ],
+      "product_id": [
+        71,
+        "[V_B_BLACK_31] Fuß 35mm Balance schwarz"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:43",
+      "product_tmpl_id": [
+        72,
+        "EVO2 Lightweight Drohne"
+      ],
+      "product_id": [
+        72,
+        "EVO2 Lightweight Drohne"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    },
+    {
+      "umh_id": "bom:44",
+      "product_tmpl_id": [
+        73,
+        "EVO2 Balance Drohne"
+      ],
+      "product_id": [
+        73,
+        "EVO2 Balance Drohne"
+      ],
+      "product_qty": 1.0,
+      "type": "normal",
+      "code": false
+    }
+  ],
+  "routing": {
+    "umh_id": "routing:spartan",
+    "operations": [
+      {
+        "seq": 10,
+        "name": "3D-Druck Füße",
+        "workcenter_code": "WC-3D",
+        "setup_time_min": 10,
+        "run_time_min": 60,
+        "qty_per_cycle": 4
+      },
+      {
+        "seq": 20,
+        "name": "3D-Druck Haube",
+        "workcenter_code": "WC-3D",
+        "setup_time_min": 10,
+        "run_time_min": 240,
+        "qty_per_cycle": 1
+      },
+      {
+        "seq": 30,
+        "name": "Laserschneiden Grundplatte",
+        "workcenter_code": "WC-LC",
+        "setup_time_min": 10,
+        "run_time_min": 10,
+        "qty_per_cycle": 1
+      },
+      {
+        "seq": 40,
+        "name": "Nacharbeit Grundplatte",
+        "workcenter_code": "WC-NACH",
+        "setup_time_min": 5,
+        "run_time_min": 15,
+        "qty_per_cycle": 1
+      },
+      {
+        "seq": 50,
+        "name": "Nacharbeit Füße",
+        "workcenter_code": "WC-NACH",
+        "setup_time_min": 5,
+        "run_time_min": 10,
+        "qty_per_cycle": 4
+      },
+      {
+        "seq": 60,
+        "name": "Nacharbeit Haube",
+        "workcenter_code": "WC-NACH",
+        "setup_time_min": 5,
+        "run_time_min": 10,
+        "qty_per_cycle": 1
+      },
+      {
+        "seq": 70,
+        "name": "WT bestücken",
+        "workcenter_code": "WC-WTB",
+        "setup_time_min": 5,
+        "run_time_min": 8,
+        "qty_per_cycle": 1
+      },
+      {
+        "seq": 80,
+        "name": "Löten Elektronik",
+        "workcenter_code": "WC-LOET",
+        "setup_time_min": 5,
+        "run_time_min": 15,
+        "qty_per_cycle": 1
+      },
+      {
+        "seq": 90,
+        "name": "Montage Elektronik",
+        "workcenter_code": "WC-MONT1",
+        "setup_time_min": 5,
+        "run_time_min": 10,
+        "qty_per_cycle": 1
+      },
+      {
+        "seq": 100,
+        "name": "Flashen Flugcontroller",
+        "workcenter_code": "WC-FLASH",
+        "setup_time_min": 5,
+        "run_time_min": 8,
+        "qty_per_cycle": 1
+      },
+      {
+        "seq": 110,
+        "name": "Montage Gehäuse & Rotoren",
+        "workcenter_code": "WC-MONT2",
+        "setup_time_min": 5,
+        "run_time_min": 12,
+        "qty_per_cycle": 1
+      },
+      {
+        "seq": 120,
+        "name": "End-Qualitätskontrolle",
+        "workcenter_code": "WC-QM-END",
+        "setup_time_min": 2,
+        "run_time_min": 5,
+        "qty_per_cycle": 1
+      }
+    ]
+  }
+}

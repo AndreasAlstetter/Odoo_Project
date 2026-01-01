@@ -1,0 +1,4 @@
+order_id,customer_id,product_id,quantity,unit_price,test_case
+SO001,1,DRONE-V1,2,500.00,Happy Path - Complete Flow
+SO002,2,DRONE-V2,1,650.00,Partial Delivery
+SO003,3,DRONE-V1,5,500.00,Large Order
