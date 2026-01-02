@@ -49,6 +49,11 @@ from integration.umh_events import UMHEventManager, EventType
 from integration.umh_client_sim import UMHClientSimulator
 from integration.umh_export_masterdata import export_masterdata
 
+from config import REORDERING_CSV_PATH
+from importers.reordering_rules import ReorderingRulesImporter
+
+from processes.traceability import TraceabilityManager
+
 
 # Zentrale Typer-App
 app = typer.Typer(help="Odoo-Drohnen-Projekt: Komplettaufbau & Validierung")
@@ -516,9 +521,7 @@ def setup_all(
 def demo_sales(
     debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
 ) -> None:
-    """
-    Führt die Demo 'Angebot → Auftrag' mit mehreren Testfällen durch.
-    """
+    """Führt die Demo Angebot → Auftrag mit mehreren Testfällen durch."""
     api = get_api(debug_enabled=debug_flag)
     flow = SalesFlow(api)
     try:
@@ -531,10 +534,10 @@ def demo_sales(
 @prozesse_app.command("export-umh-masterdata")
 def cli_export_umh_masterdata(
     output_file: str = typer.Option(
-        "umhmasterdata.json",
+        None,
         "--output",
         "-o",
-        help="Zieldatei für UMH-Stammdaten-Export",
+        help="Zieldatei für UMH-Stammdaten-Export (Standard: data/export/umh_masterdata.json).",
     ),
     debug_flag: bool = typer.Option(
         False,
@@ -542,12 +545,19 @@ def cli_export_umh_masterdata(
         help="Debug-Ausgaben aktivieren.",
     ),
 ) -> None:
-    api = get_api(debug_enabled=debug_flag)
-    # falls export_masterdata die API nicht braucht, kannst du debug_flag
-    # nur für Logging verwenden
-    export_masterdata(output_file)
-    typer.secho(f"UMH-Stammdaten nach {output_file} exportiert.", fg=typer.colors.GREEN)
+    """
+    Exportiert UMH-Stammdaten (Produkte, BoMs, Routing) in eine JSON-Datei.
+    """
+    # optional: Login nur für Konsistenz/Debug (export_masterdata nutzt eigene OdooAPI)
+    get_api(debug_enabled=debug_flag)
 
+    path = output_file or UMH_MASTERDATA_EXPORT_FILE
+    try:
+        export_masterdata(path)
+        success(f"UMH-Stammdaten nach {path} exportiert.")
+    except Exception as exc:
+        error(f"Fehler beim UMH-Masterdaten-Export: {exc}")
+        raise typer.Exit(code=1)
 
 
 
@@ -569,15 +579,12 @@ def demo_purchase(
 
 @prozesse_app.command("demo-production-all")
 def demo_production_all(
-    debug_flag: bool = typer.Option(
-        False,
-        "--debug",
-        help="Debug-Ausgaben aktivieren.",
-    )
+    debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
 ) -> None:
     api = get_api(debug_enabled=debug_flag)
     flow = ProductionFlow(api)
     flow.run_demo_all_variants()
+
 
 
 @prozesse_app.command("demo-manufacturing")
@@ -682,6 +689,159 @@ def demo_endtoend(
         error(f"Fehler in demo-endtoend: {exc}")
         raise typer.Exit(code=1)
 
+@prozesse_app.command("import-reordering-rules")
+def import_reordering_rules(
+    csv_path: str = typer.Option(
+        None,
+        "--csv",
+        help="Pfad zur CSV-Datei mit Reordering-Regeln "
+             "(Standard: REORDERING_CSV_PATH aus config.py).",
+    ),
+    debug_flag: bool = typer.Option(
+        False, "--debug", help="Debug-Ausgaben aktivieren."
+    ),
+) -> None:
+    """
+    Importiert Reordering-/Mindestbestandsregeln aus einer CSV-Datei
+    (product_name, location_name, min_qty, max_qty) in
+    stock.warehouse.orderpoint.
+    """
+    api = get_api(debug_enabled=debug_flag)
+    importer = ReorderingRulesImporter(api)
+
+    path = csv_path or REORDERING_CSV_PATH
+    info(f"Starte Reordering-Import aus {path}...")
+    ok = importer.import_from_csv(path)
+    if ok:
+        success("Reordering-Regeln erfolgreich importiert.")
+
+@prozesse_app.command("check-reordering-status")
+def check_reordering_status(
+    debug_flag: bool = typer.Option(
+        False, "--debug", help="Debug-Ausgaben aktivieren."
+    ),
+) -> None:
+    """
+    Zeigt Reordering Rules (Min/Max) und aktuelle Verfügbarkeiten aus stock.quant an.
+    """
+    api = get_api(debug_enabled=debug_flag)
+    importer = ReorderingRulesImporter(api)
+    importer.print_reordering_status()
+
+@prozesse_app.command("trace-all-products")
+def trace_all_products(
+    debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
+) -> None:
+    """
+    Erzeugt einfache Traceability-Informationen für alle Produkte:
+    Fertigungsaufträge und zugehörige Lieferungen.
+    """
+    api = get_api(debug_enabled=debug_flag)
+    tm = TraceabilityManager(api)
+
+    products = api.search_read(
+        "product.product",
+        [],
+        ["id", "name"],
+        limit=200,  # bei Bedarf erhöhen oder filtern
+    )
+    if not products:
+        info("Keine Produkte gefunden.")
+        return
+
+    for p in products:
+        pid = p["id"]
+        name = p.get("name", "")
+        chain = tm.get_traceability_chain(pid)
+        mos = len(chain.get("mos", []))
+        dels = len(chain.get("deliveries", []))
+        info(f"Traceability für Produkt '{name}' (ID {pid}): {mos} MOs, {dels} Lieferungen.")
+
+@prozesse_app.command("assign-serial")
+def assign_serial(
+    product_name: str = typer.Argument(..., help="Produktname in Odoo."),
+    serial: str = typer.Argument(..., help="Seriennummer (Lot-Name)."),
+    debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
+) -> None:
+    """
+    Legt eine Seriennummer (stock.lot) für ein Produkt an oder liefert die bestehende zurück.
+    """
+    api = get_api(debug_enabled=debug_flag)
+    tm = TraceabilityManager(api)
+
+    prod = api.search_read(
+        "product.product",
+        [["name", "=", product_name]],
+        ["id"],
+        limit=1,
+    )
+    if not prod:
+        error(f"Produkt '{product_name}' nicht gefunden.")
+        raise typer.Exit(code=1)
+
+    product_id = prod[0]["id"]
+    lot_id = tm.assign_serial_number(product_id, serial)
+    if lot_id is None:
+        error("Seriennummer konnte nicht angelegt/zugeordnet werden.")
+        raise typer.Exit(code=1)
+
+    success(f"Seriennummer '{serial}' für Produkt '{product_name}' verwendet (Lot-ID {lot_id}).")
+
+@prozesse_app.command("demo-reordering-purchase")
+def demo_reordering_purchase(
+    product_name: str = typer.Option(
+        "Akku",
+        "--product",
+        "-p",
+        help="Produktname mit Reordering Rule (z. B. Akku).",
+    ),
+    debug_flag: bool = typer.Option(
+        False,
+        "--debug",
+        help="Debug-Ausgaben aktivieren.",
+    ),
+) -> None:
+    """
+    Demo: Reordering-Status für ein Produkt prüfen und einen einfachen Einkaufsprozess ausführen.
+    """
+    api = get_api(debug_enabled=debug_flag)
+    purch = PurchaseFlow(api)
+    rr_importer = ReorderingRulesImporter(api)
+
+    # 1) Produkt suchen
+    prod = api.search_read(
+        "product.product",
+        [["name", "=", product_name]],
+        ["id", "name"],
+        limit=1,
+    )
+    if not prod:
+        error(f"Produkt '{product_name}' nicht gefunden.")
+        raise typer.Exit(code=1)
+
+    product_id = prod[0]["id"]
+    info(f"Starte Reordering/Einkaufs-Demo für Produkt '{product_name}' (ID {product_id})...")
+
+    # 2) Reordering-Status für alle Produkte anzeigen (inkl. Zielprodukt)
+    rr_importer.print_reordering_status()
+
+    # 3) Einkaufsszenario ausführen (nutzt deine bestehende Purchase-Demo-Logik)
+    info("Starte Einkaufs-Demo (RFQ → Bestellung → Wareneingang)...")
+    purch.run_demo_purchasing()
+    success("Einkaufs-Demo abgeschlossen.")
+
+    # 4) Reordering-Status erneut anzeigen
+    info("Reordering-Status nach Einkaufs-Demo:")
+    rr_importer.print_reordering_status()
+
+@prozesse_app.command("check-reordering-status-location")
+def check_reordering_status_location(
+    location: str = typer.Option("WH/Stock", "--location", "-l", help="Lagerort complete_name."),
+    debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
+) -> None:
+    api = get_api(debug_enabled=debug_flag)
+    importer = ReorderingRulesImporter(api)
+    importer.print_reordering_status_for_location(location)
 
 # ============================================================================
 # Test- und Demo-Skripte

@@ -14,16 +14,22 @@ LOGIN = os.getenv("LOGIN", "felix.reich@tha.de")
 
 API_KEY = os.getenv("API_KEY", "51ba1fb1ab26c77d6368b055e9f1c34b02583600")
 
-
+# Projektwurzel
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Zentrales Datenverzeichnis
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
-# Unterordner für verschiedene Domänen
+# Zentrales CSV-Verzeichnis
 RAW_CSV_DIR = os.path.join(DATA_DIR, "csv_raw")
+
+# Domain-spezifische Datenverzeichnisse
 DOMAIN_DATA_DIR = os.path.join(DATA_DIR, "domain")
+
+# UMH-Verzeichnis
 UMH_DATA_DIR = os.path.join(DATA_DIR, "umh")
+
+# Export-Verzeichnis
 EXPORT_DIR = os.path.join(DATA_DIR, "export")
 
 # CSV-Pfade (lesende Importe)
@@ -71,6 +77,7 @@ SONSTIGE_DIR = os.path.join(DOMAIN_DATA_DIR, "sonstige_stammdaten")
 # UMH-Dateien (JSON)
 UMH_EVENTS_ENDTOEND_FILE = os.path.join(UMH_DATA_DIR, "umh_events_endtoend.json")
 UMH_MASTERDATA_EXPORT_FILE = os.path.join(EXPORT_DIR, "umh_masterdata.json")
+UMH_EVENTS_PRODUCTION_FILE = os.path.join(UMH_DATA_DIR, "umh_events_production.json")
 
 # Produktnamen für Varianten
 PRODUCT_SPARTAN_NAME = "EVO2 Spartan Drohne"
@@ -96,4 +103,16 @@ USERS_ROLES_CSV_PATH = os.getenv(
 CUSTOMERS_CSV_PATH = os.getenv(
     "CUSTOMERS_CSV_PATH",
     os.path.join(RAW_CSV_DIR, "customers.csv"),
+)
+
+# Routing CSV-Pfad
+ROUTING_CSV_PATH = os.getenv(
+    "ROUTING_CSV_PATH",
+    os.path.join(RAW_CSV_DIR, "routings.csv"),
+)
+
+# Reordering CSV-Pfad
+REORDERING_CSV_PATH = os.getenv(
+    "REORDERING_CSV_PATH",
+    os.path.join(RAW_CSV_DIR, "reordering_rules.csv"),
 )

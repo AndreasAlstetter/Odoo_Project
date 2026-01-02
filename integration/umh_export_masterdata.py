@@ -23,8 +23,10 @@ from integration.umh_mapping import UMHMapper
 from processes.production_routing import get_routing
 from core import info
 
+from config import UMH_MASTERDATA_EXPORT_FILE
 
-def export_masterdata(output_file: str = "umh_masterdata.json") -> Path:
+def export_masterdata(output_file: str | None = None) -> None:
+    path = output_file or UMH_MASTERDATA_EXPORT_FILE
     """
     Exportiert Masterdaten aus Odoo in eine UMH-Masterdata-Datei.
 
@@ -99,7 +101,7 @@ def export_masterdata(output_file: str = "umh_masterdata.json") -> Path:
         "routing": umh_routing,
     }
 
-    out_path = Path(output_file)
+    out_path = Path(path)
     out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     info(f"UMH-Masterdata-Export abgeschlossen: {out_path}")
     return out_path

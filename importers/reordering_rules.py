@@ -44,7 +44,9 @@ class ReorderingRulesImporter:
             limit=1,
         )
         if not prod:
-            raise RuntimeError(f"Produkt für Reordering Rule nicht gefunden: '{product_name}'")
+            warning(f"Produkt für Reordering Rule nicht gefunden: '{product_name}', Zeile wird übersprungen.")
+            return 0
+
 
         product_id = prod[0]["id"]
 
@@ -75,6 +77,21 @@ class ReorderingRulesImporter:
 
         min_qty = float(data.get("min_qty") or 0.0)
         max_qty = float(data.get("max_qty") or 0.0)
+
+        # NEU: prüfen, ob es schon eine Rule gibt
+        existing = self.api.search_read(
+            "stock.warehouse.orderpoint",
+            [["product_id", "=", product_id], ["location_id", "=", location_id]],
+            ["id"],
+            limit=1,
+        )
+        if existing:
+            op_id = existing[0]["id"]
+            info(
+                f"Reordering Rule für Produkt '{product_name}' am Lagerort {location_name or location_id} "
+                f"existiert bereits (ID {op_id}), überspringe."
+            )
+            return int(op_id)
 
         vals: Dict[str, object] = {
             "product_id": product_id,
@@ -123,3 +140,88 @@ class ReorderingRulesImporter:
 
         info(f"Reordering-Import aus {filepath} abgeschlossen.")
         return True
+    
+    def print_reordering_status(self) -> None:
+        """
+        Gibt einen Überblick über Reordering Rules (Min/Max) und aktuelle Verfügbarkeiten.
+        Aktuell: Verfügbarkeit über alle Lagerorte (ohne Location-Filter).
+        """
+        rules = self.api.search_read(
+            "stock.warehouse.orderpoint",
+            [],
+            ["id", "product_id", "location_id", "product_min_qty", "product_max_qty"],
+            limit=200,
+        )
+        if not rules:
+            info("Keine Reordering Rules gefunden.")
+            return
+
+        for op in rules:
+            product_id, product_name = op["product_id"]
+            location = op.get("location_id")
+            location_id = location[0] if location else None
+            location_name = location[1] if location else "N/A"
+            min_qty = op.get("product_min_qty", 0.0)
+            max_qty = op.get("product_max_qty", 0.0)
+
+            # WICHTIG: ohne Location-Filter, um alle Quants zu sehen
+            quants = self.api.search_read(
+                "stock.quant",
+                [["product_id", "=", product_id]],
+                ["quantity"],
+                limit=500,
+            )
+            available = sum(q.get("quantity", 0.0) for q in quants)
+
+            info(
+                f"Reordering '{product_name}': Min={min_qty}, Max={max_qty}, "
+                f"Verfügbar={available} (Location={location_name})"
+            )
+
+    def print_reordering_status_for_location(self, location_complete_name: str) -> None:
+        """
+        Wie print_reordering_status, aber nur Quants im angegebenen Lagerort
+        (complete_name, z. B. 'WH/Stock') berücksichtigen.
+        """
+        locs = self.api.search_read(
+            "stock.location",
+            [["complete_name", "=", location_complete_name]],
+            ["id"],
+            limit=1,
+        )
+        if not locs:
+            warning(f"Lagerort '{location_complete_name}' nicht gefunden.")
+            return
+
+        location_id = locs[0]["id"]
+
+        rules = self.api.search_read(
+            "stock.warehouse.orderpoint",
+            [["location_id", "=", location_id]],
+            ["id", "product_id", "location_id", "product_min_qty", "product_max_qty"],
+            limit=200,
+        )
+        if not rules:
+            info(f"Keine Reordering Rules für Lagerort {location_complete_name} gefunden.")
+            return
+
+        for op in rules:
+            product_id, product_name = op["product_id"]
+            min_qty = op.get("product_min_qty", 0.0)
+            max_qty = op.get("product_max_qty", 0.0)
+
+            quants = self.api.search_read(
+                "stock.quant",
+                [
+                    ["product_id", "=", product_id],
+                    ["location_id", "=", location_id],
+                ],
+                ["quantity"],
+                limit=500,
+            )
+            available = sum(q.get("quantity", 0.0) for q in quants)
+
+            info(
+                f"[{location_complete_name}] Reordering '{product_name}': "
+                f"Min={min_qty}, Max={max_qty}, Verfügbar={available}"
+            )

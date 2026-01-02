@@ -24,6 +24,8 @@ from ..processes.inventory_flow import InventoryFlow
 from ..integration.umh_events import UMHEventManager, EventType
 from ..integration.umh_client_sim import UMHClientSimulator
 
+from config import UMH_EVENTS_ENDTOEND_FILE
+EVENT_FILE = UMH_EVENTS_ENDTOEND_FILE
 
 def main() -> None:
     # 1) Odoo-Verbindung
@@ -63,13 +65,13 @@ def main() -> None:
     umh_manager.queue_event(umh_manager.create_shipping_event(delivery_id=1))
 
     events = [e.to_dict() for e in umh_manager.get_pending_events()]
-    output_file = "umh_events_endtoend.json"
-    UMHClientSimulator(output_file=output_file).send_events_batch(events)
 
-    with open(output_file, "w", encoding="utf-8") as f:
+    UMHClientSimulator(output_file=EVENT_FILE).send_events_batch(events)
+
+    with open(EVENT_FILE, "w", encoding="utf-8") as f:
         json.dump(events, f, ensure_ascii=False, indent=2)
 
-    print(f"End-to-end Demo fertig. Events in {output_file} geschrieben.")
+    print(f"End-to-end Demo fertig. Events in {EVENT_FILE} geschrieben.")
 
 
 if __name__ == "__main__":

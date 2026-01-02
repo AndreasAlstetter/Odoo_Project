@@ -23,6 +23,7 @@ from core.logging_utils import info, success
 from processes.production_routing import get_routing, VariantName
 from integration.umh_events import UMHEventManager, EventType
 from integration.umh_client_sim import UMHClientSimulator
+from config import UMH_EVENTS_PRODUCTION_FILE
 
 
 class ProductionFlow:
@@ -31,7 +32,7 @@ class ProductionFlow:
     def __init__(self, api: OdooAPI) -> None:
         self.api = api
         self.umh_manager = UMHEventManager()
-        self.umh_client = UMHClientSimulator(output_file="umh_events_production.json")
+        self.umh_client = UMHClientSimulator(output_file=UMH_EVENTS_PRODUCTION_FILE)
 
     def run_production_for_variant(self, variant: VariantName, quantity: float = 1.0) -> None:
         """

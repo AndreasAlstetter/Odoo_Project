@@ -33,11 +33,10 @@ from config import (
     PRODUCT_SPARTAN_NAME,
     PRODUCT_LIGHTWEIGHT_NAME,
     PRODUCT_BALANCE_NAME,
+    ROUTING_CSV_PATH,
 )
+
 from core import info
-
-
-ROUTING_CSV_PATH = Path("data/routings.csv")
 
 
 class RoutingImporter:
@@ -54,7 +53,7 @@ class RoutingImporter:
             ``data/routings.csv``.
         """
         self.api = api
-        self.csv_path = csv_path or ROUTING_CSV_PATH
+        self.csv_path = csv_path or Path(ROUTING_CSV_PATH)
 
     def _load_rows(self) -> List[Dict[str, str]]:
         """
