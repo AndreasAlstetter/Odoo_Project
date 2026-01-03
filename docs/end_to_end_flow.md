@@ -1,6 +1,6 @@
 # End-to-End Flow – Odoo-Drohnenprojekt
 
-*Stand: 2026-01-02T19:05:15*
+*Stand: 2026-01-03T09:27:38*
 
 Dieses Dokument beschreibt den vollständigen End-to-End-Prozess im Prototyp:
 Von Kundenbedarf über Verkauf, Fertigung, Einkauf, Lager/Inventur, Versand
@@ -54,13 +54,28 @@ Interne Schritte:
 4. **Inventur & Ausschuss (`InventoryFlow`)** – `run_demo_inventory_and_scrap()` führt einen Inventurfall und eine Ausschussbuchung ins Schrottlager aus.
 5. **Versand (`ShippingFlow`)** – `run_demo_shipping(orders)` bucht Lieferungen für die Demo-Verkaufsaufträge.
 6. **UMH-Events** – `UMHEventManager` erzeugt Events, `UMHClientSimulator` schreibt sie nach
-   `C:\Users\andre\OneDrive\Dokumente\Studium_Systems_Engineering\W_2 Schwerpunkt\Projekt\Odoo\Code\Prototyp_2\data\umh\umh_events_endtoend.json`.
+   `C:\Users\andre\OneDrive\Dokumente\Studium_Systems_Engineering\W_2 Schwerpunkt\Projekt\Odoo\Code\Prototyp_2\data\umh\umh_events_endtoend.json` (Standard: `data/umh/umh_events_endtoend.json`).
 
 ---
 
-## 3. UMH-Eventmodell
+## 3. Inventur und Ausschuss im Detail
 
-### 3.1 Eventtypen
+Die Inventur- und Ausschussprozesse werden durch `InventoryFlow` gekapselt
+(`processes/inventory_flow.py`):
+
+- `run_demo_inventory_case()` legt für das Demo-Produkt **Akku** eine Inventur an,
+  setzt eine gezählte Menge (z. B. 10 Stück) und validiert die Inventur.
+- `scrap_product("Akku", 1.0)` bucht anschließend 1 Stück als Ausschuss in ein
+  Schrottlager (`stock.location` mit usage=`inventory`, Name `Scrap`).
+
+Im kombinierten CLI-Ablauf `prozesse demo-endtoend` wird dies über
+`InventoryFlow.run_demo_inventory_and_scrap()` zusammen ausgeführt.
+
+---
+
+## 4. UMH-Eventmodell
+
+### 4.1 Eventtypen
 
 Definiert in `integration/umh_events.py`:
 
@@ -76,7 +91,7 @@ Gemeinsame Struktur aller Events:
 - `timestamp` – ISO-Zeitstempel.
 - `payload` – strukturierte Nutzdaten (z. B. `mo_id`, `product_id`, `location_id`, `delivery_id`).
 
-### 3.2 Beispiel-Events aus der End-to-End-Demo
+### 4.2 Beispiel-Events aus der End-to-End-Demo
 
 Dateipfad: `C:\Users\andre\OneDrive\Dokumente\Studium_Systems_Engineering\W_2 Schwerpunkt\Projekt\Odoo\Code\Prototyp_2\data\umh\umh_events_endtoend.json`.
 
@@ -86,23 +101,23 @@ Beispielauszug:
 [
   {
     "type": "mo_completed",
-    "timestamp": "2026-01-02T17:33:08.982825",
+    "timestamp": "2026-01-02T18:25:03.243835",
     "payload": {
-      "mo_id": 73
+      "mo_id": 76
     }
   },
   {
     "type": "mo_completed",
-    "timestamp": "2026-01-02T17:33:08.982825",
+    "timestamp": "2026-01-02T18:25:03.243835",
     "payload": {
-      "mo_id": 74
+      "mo_id": 77
     }
   },
   {
     "type": "mo_completed",
-    "timestamp": "2026-01-02T17:33:08.982825",
+    "timestamp": "2026-01-02T18:25:03.243835",
     "payload": {
-      "mo_id": 75
+      "mo_id": 78
     }
   }
 ]
@@ -110,7 +125,7 @@ Beispielauszug:
 
 ---
 
-## 4. UMH-Masterdaten-Export
+## 5. UMH-Masterdaten-Export
 
 Die Stammdaten werden über `integration/umh_export_masterdata.export_masterdata` als UMH-Masterdaten exportiert.
 
@@ -128,7 +143,7 @@ python main.py prozesse export-umh-masterdata --debug
 
 ---
 
-## 5. Dateien & Einstiegspunkte
+## 6. Dateien & Einstiegspunkte
 
 - **CLI-Einstieg:** `main.py` → ruft `app` aus `cli.py` auf (Typer-CLI).
 - **CLI-Kommandos:** `cli.py`
@@ -141,3 +156,24 @@ python main.py prozesse export-umh-masterdata --debug
   - `integration/umh_events.py` – Eventtypen, Eventmodell und Eventmanager.
   - `integration/umh_client_sim.py` – simulierter UMH-Client, schreibt JSON-Events in Datei.
   - `integration/umh_export_masterdata.py` – Export der UMH-Masterdaten.
+---
+
+## 7. Traceability (Serien-/Chargennummern)
+
+Die Seriennummern- und Traceability-Funktionen werden über den
+`TraceabilityManager` in `processes/traceability.py` bereitgestellt:
+
+- `assign_serial_number(product_id, serial)` legt eine Seriennummer als `stock.lot`
+  für ein Produkt an (oder findet sie wieder).
+- `track_component_usage(mo_id, component_id, serial)` markiert eine Seriennummer
+  als in einem Fertigungsauftrag verwendet.
+- `get_traceability_chain(product_id)` liefert eine einfache Kette aus
+  Fertigungsaufträgen und zugehörigen Lieferungen für ein Produkt.
+
+Über das CLI-Kommando
+
+```bash
+python main.py prozesse trace-all-products --debug
+```
+
+kann eine Übersicht über die Traceability-Ketten aller Produkte ausgegeben werden.

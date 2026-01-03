@@ -116,3 +116,17 @@ REORDERING_CSV_PATH = os.getenv(
     "REORDERING_CSV_PATH",
     os.path.join(RAW_CSV_DIR, "reordering_rules.csv"),
 )
+
+# MQTT-Konfiguration für UMH-Client
+MQTT_BROKER_HOST = os.getenv("MQTT_BROKER_HOST", "6cb0dc4093f24795858c66688fbff7a0.s1.eu.hivemq.cloud")
+MQTT_BROKER_PORT = int(os.getenv("MQTT_BROKER_PORT", "8883"))
+MQTT_USERNAME = os.getenv("MQTT_USERNAME", "mqtt_digital_twin_tests")
+MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "4v3h7Gzau§g=")
+
+
+# Basis-Topic für KPI-Daten
+MQTT_BASE_TOPIC = os.getenv("MQTT_BASE_TOPIC", "ttz-leipheim/odoo/kpi/data")
+
+
+# Event-Topic für Odoo → UMH
+MQTT_EVENTS_TOPIC = "ttz-leipheim/odoo/events"

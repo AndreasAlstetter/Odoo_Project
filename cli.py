@@ -18,13 +18,16 @@ Top-Level-Gruppierungen:
 - prozesse: End-to-End-Geschäftsprozesse (Sales, Purchase, Manufacturing, Inventory, Shipping, Produktion, End-to-End + UMH)
 - tests: Test- und Demo-Skripte (End-to-End-File-Demo usw.)
 """
+from __future__ import annotations
 
 from typing import Optional
 import os
 
 import typer
+import time
 
-from config import ODOO_URL, DB_NAME, LOGIN, UMH_MASTERDATA_EXPORT_FILE, UMH_EVENTS_ENDTOEND_FILE, DATA_DIR
+
+from config import ODOO_URL, DB_NAME, LOGIN, UMH_MASTERDATA_EXPORT_FILE, UMH_EVENTS_ENDTOEND_FILE, DATA_DIR, MQTT_BASE_TOPIC, MQTT_EVENTS_TOPIC
 from core import info, success, warning, error, debug
 from odoo_api import OdooAPI
 
@@ -54,6 +57,14 @@ from importers.reordering_rules import ReorderingRulesImporter
 
 from processes.traceability import TraceabilityManager
 
+from kpi.kpi_extractor import KpiExtractor
+from messaging.mqtt_client import MqttClient
+
+from core.logging_utils import info
+
+from datetime import datetime
+
+from integration.umh_mapping import enrich_event_with_uns
 
 # Zentrale Typer-App
 app = typer.Typer(help="Odoo-Drohnen-Projekt: Komplettaufbau & Validierung")
@@ -530,6 +541,197 @@ def demo_sales(
         error(f"Fehler in demo-sales: {exc}")
         raise typer.Exit(code=1)
 
+# integration/umh_mapping.py
+from typing import Dict, Any, Optional
+
+
+LOCATION_TO_UNS: Dict[str, str] = {
+    "WH/Stock": "ttz-leipheim/warehouse/main",
+    "WH/Incoming": "ttz-leipheim/warehouse/inbound",
+    "WH/Production": "ttz-leipheim/production/buffer",
+}
+
+WORKCENTER_TO_UNS: Dict[str, str] = {
+    "3D Drucker": "ttz-leipheim/assembly_1/3d_printer",
+    "Lasercutter": "ttz-leipheim/assembly_1/laser",
+    "Montage": "ttz-leipheim/assembly_2/assembly",
+    "Qualität": "ttz-leipheim/quality/station_1",
+}
+
+PRODUCT_TO_UNS: Dict[str, str] = {
+    "EVO2 Spartan Drohne": "ttz-leipheim/product/evo2_spartan",
+    "EVO2 Lightweight Drohne": "ttz-leipheim/product/evo2_lightweight",
+    "EVO2 Balance Drohne": "ttz-leipheim/product/evo2_balance",
+}
+
+
+def map_location_to_uns(location_name: str) -> str:
+    return LOCATION_TO_UNS.get(location_name, f"ttz-leipheim/location/{location_name}")
+
+
+def map_workcenter_to_uns(workcenter_name: str) -> str:
+    return WORKCENTER_TO_UNS.get(workcenter_name, f"ttz-leipheim/workcenter/{workcenter_name}")
+
+
+def map_product_to_uns(product_name: str) -> str:
+    return PRODUCT_TO_UNS.get(product_name, f"ttz-leipheim/product/{product_name}")
+
+
+def enrich_event_with_uns(event: Dict[str, Any]) -> Dict[str, Any]:
+    data = dict(event.get("data") or {})
+
+    prod_name: Optional[str] = data.get("product_name")
+    if prod_name:
+        data["product_uns"] = map_product_to_uns(prod_name)
+
+    loc_from_name: Optional[str] = data.get("location_from_name")
+    if loc_from_name:
+        data["location_from_uns"] = map_location_to_uns(loc_from_name)
+
+    loc_to_name: Optional[str] = data.get("location_to_name")
+    if loc_to_name:
+        data["location_to_uns"] = map_location_to_uns(loc_to_name)
+
+    event["data"] = data
+    return event
+
+@prozesse_app.command("demo-manufacturing-flow")
+def demo_manufacturing_flow(
+    so_name: str = typer.Option(
+        "", "--so-name", help="Name des vorhandenen Verkaufsauftrags (z. B. SO0001)."
+    ),
+    debug_flag: bool = typer.Option(False, "--debug"),
+) -> None:
+    """
+    Simuliert einen einfachen Fertigungsablauf:
+    - findet MOs zum Sales Order
+    - reserviert Material
+    - markiert Workorders/MO als fertig (vereinfachte Variante)
+    - erzeugt und erledigt eine Lieferung.
+    """
+    api = get_api(debug_enabled=debug_flag)
+
+    # 1) Falls SO-Name leer: letzten bestätigten Auftrag holen
+    if not so_name:
+        orders = api.search_read(
+            "sale.order",
+            [["state", "=", "sale"]],
+            ["id", "name", "date_order"],
+            limit=1,
+        )
+        if not orders:
+            raise RuntimeError("Kein bestätigter Verkaufsauftrag gefunden.")
+        so_name = orders[0]["name"]
+        info(f"Verwende letzten bestätigten Auftrag: {so_name}")
+
+    # 2) Zugehörige MOs finden
+    mos = api.search_read(
+        "mrp.production",
+        [["origin", "=", so_name]],
+        ["id", "name", "product_id", "product_qty", "state"],
+        limit=10,
+    )
+    if not mos:
+        raise RuntimeError(f"Keine Manufacturing Orders zu {so_name} gefunden.")
+
+    info(f"Gefundene MOs zu {so_name}:")
+    for mo in mos:
+        prod = mo.get("product_id") or [None, ""]
+        info(
+            f"  MO {mo['name']} (ID {mo['id']}), Produkt={prod[1]}, "
+            f"Menge={mo['product_qty']}, Status={mo['state']}"
+        )
+
+    # MQTT-Client optional nutzen, um Events mitzuschicken
+    mqtt_client = MqttClient()
+    mqtt_client.connect()
+    ts = int(round(time.time() * 1000))
+
+    # 3) Für jeden MO: Material reservieren und Produktion „durchspielen“
+    for mo in mos:
+        mo_id = mo["id"]
+        mo_name = mo["name"]
+        prod = mo.get("product_id") or [None, ""]
+        qty = float(mo.get("product_qty", 0.0) or 0.0)
+
+        info(f"Verarbeite MO {mo_name} (ID {mo_id}).")
+
+        # a) Komponenten reservieren
+        api.call_method("mrp.production", "action_assign", [mo_id])
+        info(f"  Material für MO {mo_name} reserviert.")
+
+        # b) Produktion starten
+        api.call_method("mrp.production", "button_mark_done", [mo_id])
+        info(f"  MO {mo_name} als 'done' markiert.")
+
+        # c) MQTT-Event für Fertigmeldung senden
+        event = {
+            "timestamp": ts,
+            "source": "odoo",
+            "event_type": "mo_demo_finished",
+            "entity": "mrp.production",
+            "entity_id": mo_id,
+            "data": {
+                "mo_id": mo_id,
+                "mo_name": mo_name,
+                "product_id": prod[0],
+                "product_name": prod[1],
+                "qty": qty,
+                "finished_at": datetime.utcnow().isoformat(),
+            },
+        }
+        event = enrich_event_with_uns(event)
+        mqtt_client.publish_event(event)
+
+    # kurze Pause, damit Lagerbewegungen/Verfügbarkeiten in Odoo nachziehen
+    time.sleep(1.0)
+
+    # 4) Lieferungen (Warenausgang) zum Auftrag finden und erledigen
+    pickings = api.search_read(
+        "stock.picking",
+        [
+            ["origin", "=", so_name],
+            ["picking_type_code", "=", "outgoing"],
+        ],
+        ["id", "name", "state"],
+        limit=10,
+    )
+    if not pickings:
+        info(f"Keine Lieferungen zum Auftrag {so_name} gefunden.")
+        return
+
+    info(f"Gefundene Lieferungen zu {so_name}:")
+    for pk in pickings:
+        info(f"  Picking {pk['name']} (ID {pk['id']}), Status={pk['state']}")
+
+    for pk in pickings:
+        if pk["state"] in ("done", "cancel"):
+            continue
+
+        picking_id = pk["id"]
+        # a) Verfügbarkeit prüfen / reservieren
+        api.call_method("stock.picking", "action_assign", [picking_id])
+        # b) Alles als geliefert markieren (vereinfachte Demo)
+        api.call_method("stock.picking", "button_validate", [picking_id])
+        info(f"  Lieferung {pk['name']} (ID {picking_id}) als 'done' verbucht.")
+
+        # c) MQTT-Event für Lieferung schicken
+        event = {
+            "timestamp": ts,
+            "source": "odoo",
+            "event_type": "delivery_demo_done",
+            "entity": "stock.picking",
+            "entity_id": picking_id,
+            "data": {
+                "picking_name": pk["name"],
+                "origin": so_name,
+                "date_done": datetime.utcnow().isoformat(),
+            },
+        }
+        mqtt_client.publish_event(event)
+
+    info("Demo-Manufacturing-Flow abgeschlossen.")
+
 
 @prozesse_app.command("export-umh-masterdata")
 def cli_export_umh_masterdata(
@@ -842,6 +1044,524 @@ def check_reordering_status_location(
     api = get_api(debug_enabled=debug_flag)
     importer = ReorderingRulesImporter(api)
     importer.print_reordering_status_for_location(location)
+
+
+# cli.py (Ausschnitt)
+@prozesse_app.command("push-kpis-mqtt")
+def push_kpis_mqtt(
+    days: int = typer.Option(7, "--days", help="Zeitraum für zeitbasierte KPIs."),
+    debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
+) -> None:
+    """
+    Liest aggregierte Rohdaten aus Odoo und sendet je KPI eine kompakte Message
+    auf das Topic ttz-leipheim/odoo/kpi/data.
+    """
+    api = get_api(debug_enabled=debug_flag)
+    from kpi.kpi_extractor import KpiExtractor
+    from messaging.mqtt_client import MqttClient
+    import time
+
+    extractor = KpiExtractor(api)
+    mqtt_client = MqttClient()
+    mqtt_client.connect()
+
+    ts = int(round(time.time() * 1000))
+
+    # 1) Output aggregiert je Produkt
+    out_agg = extractor.get_output_aggregated(days=days)
+    mqtt_client.publish_json(
+        {
+            "timestamp": ts,
+            "source": "odoo",
+            "event_type": "output_per_product_agg",
+            "window_days": out_agg["days"],
+            "data": out_agg["per_product"],
+        }
+    )
+
+    # 2) Zykluszeit-Basis aggregiert je Produkt
+    cycle_agg = extractor.get_cycle_time_aggregated(days=days)
+    mqtt_client.publish_json(
+        {
+            "timestamp": ts,
+            "source": "odoo",
+            "event_type": "cycle_time_per_product_agg",
+            "window_days": cycle_agg["days"],
+            "data": cycle_agg["per_product"],
+        }
+    )
+
+    # 3) MO-Lead-Time je MO
+    mo_lt_agg = extractor.get_mo_lead_time_aggregated(days=max(days, 30))
+    mqtt_client.publish_json(
+        {
+            "timestamp": ts,
+            "source": "odoo",
+            "event_type": "mo_lead_time_agg",
+            "window_days": mo_lt_agg["days"],
+            "data": mo_lt_agg["records"],
+        }
+    )
+
+    # 4) Scrap aggregiert je Produkt
+    scrap_agg = extractor.get_scrap_aggregated(days=days)
+    mqtt_client.publish_json(
+        {
+            "timestamp": ts,
+            "source": "odoo",
+            "event_type": "scrap_per_product_agg",
+            "window_days": scrap_agg["days"],
+            "data": scrap_agg["per_product"],
+        }
+    )
+
+    # 5) Revenue aggregiert
+    rev_agg = extractor.get_revenue_aggregated(days=max(days, 30))
+    mqtt_client.publish_json(
+        {
+            "timestamp": ts,
+            "source": "odoo",
+            "event_type": "revenue_agg",
+            "window_days": rev_agg["days"],
+            "data": {
+                "revenue_total": rev_agg["revenue_total"],
+                "records_count": rev_agg["records_count"],
+            },
+        }
+    )
+
+    # 6) Orders Lead-Time-Basis
+    lt_orders_agg = extractor.get_lead_time_orders_aggregated(days=max(days, 30))
+    mqtt_client.publish_json(
+        {
+            "timestamp": ts,
+            "source": "odoo",
+            "event_type": "order_lead_time_agg",
+            "window_days": lt_orders_agg["days"],
+            "data": lt_orders_agg["records"],
+        }
+    )
+
+    # 7) Inventory-Snapshot aggregiert je Produkt
+    inv_agg = extractor.get_inventory_aggregated()
+    mqtt_client.publish_json(
+        {
+            "timestamp": ts,
+            "source": "odoo",
+            "event_type": "inventory_snapshot_agg",
+            "window_days": days,
+            "data": inv_agg["per_product"],
+        }
+    )
+
+
+
+@prozesse_app.command("check-workorders")
+def check_workorders(
+    days: int = typer.Option(2, "--days"),
+    debug_flag: bool = typer.Option(False, "--debug"),
+) -> None:
+    api = get_api(debug_enabled=debug_flag)
+    from debug.check_workorders import check_recent_workorders
+
+    check_recent_workorders(api, days=days)
+
+@prozesse_app.command("check-scrap")
+def check_scrap(
+    days: int = typer.Option(7, "--days"),
+    debug_flag: bool = typer.Option(False, "--debug"),
+) -> None:
+    api = get_api(debug_enabled=debug_flag)
+    from debug.check_scrap import check_recent_scrap
+
+    check_recent_scrap(api, days=days)
+
+@prozesse_app.command("check-mos")
+def check_mos(
+    days: int = typer.Option(7, "--days"),
+    debug_flag: bool = typer.Option(False, "--debug"),
+) -> None:
+    api = get_api(debug_enabled=debug_flag)
+    from debug.check_mos import check_recent_mos
+
+    check_recent_mos(api, days=days)
+
+@prozesse_app.command("check-orders")
+def check_orders(
+    days: int = typer.Option(7, "--days"),
+    debug_flag: bool = typer.Option(False, "--debug"),
+) -> None:
+    api = get_api(debug_enabled=debug_flag)
+    from debug.check_orders import check_recent_orders
+
+    check_recent_orders(api, days=days)
+
+# cli.py – neues Kommando für MO-Events
+
+@prozesse_app.command("push-mo-events-mqtt")
+def push_mo_events_mqtt(
+    hours: int = typer.Option(1, "--hours", help="Zeitraum rückwärts für MO-Events."),
+    debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
+) -> None:
+    """
+    Liest MOs aus den letzten Stunden und sendet Start/Ende-Events an MQTT.
+    (Polling-Variante, z. B. als Cron-Job nutzbar.)
+    """
+    api = get_api(debug_enabled=debug_flag)
+    mqtt_client = MqttClient()
+    mqtt_client.connect()
+
+    now_utc = datetime.utcnow()
+    date_from = now_utc - timedelta(hours=hours)
+    date_from_str = date_from.strftime("%Y-%m-%d %H:%M:%S")
+
+    # MOs im relevanten Zeitraum holen (vereinfachte Filterung über date_finished/date_planned_start)
+    mos = api.search_read(
+        "mrp.production",
+        [
+            "|",
+            ["date_planned_start", ">=", date_from_str],
+            ["date_finished", ">=", date_from_str],
+        ],
+        ["id", "name", "product_id", "product_qty", "state", "date_planned_start", "date_finished"],
+        limit=500,
+    )
+
+    ts = int(round(time.time() * 1000))
+
+    for mo in mos:
+        product = mo.get("product_id") or [None, ""]
+        data_common = {
+            "mo_id": mo["id"],
+            "mo_name": mo.get("name"),
+            "product_id": product[0],
+            "product_name": product[1],
+            "qty": float(mo.get("product_qty", 0.0) or 0.0),
+        }
+
+        # MO-Start-Event, wenn geplanter Start im Zeitfenster
+        if mo.get("date_planned_start") and mo["date_planned_start"] >= date_from_str:
+            event_start = {
+                "timestamp": ts,
+                "source": "odoo",
+                "event_type": "mo_started",
+                "entity": "mrp.production",
+                "entity_id": mo["id"],
+                "data": {
+                    **data_common,
+                    "planned_start": mo["date_planned_start"],
+                    "state": mo.get("state"),
+                },
+            }
+            mqtt_client.publish_event(event_start)
+
+        # MO-Ende-Event, wenn date_finished im Zeitfenster
+        if mo.get("date_finished") and mo["date_finished"] >= date_from_str:
+            event_end = {
+                "timestamp": ts,
+                "source": "odoo",
+                "event_type": "mo_finished",
+                "entity": "mrp.production",
+                "entity_id": mo["id"],
+                "data": {
+                    **data_common,
+                    "date_finished": mo["date_finished"],
+                    "state": mo.get("state"),
+                },
+            }
+            mqtt_client.publish_event(event_end)
+
+    info(f"MO-Events für die letzten {hours} Stunden an MQTT gesendet.")
+
+@prozesse_app.command("push-stock-events-mqtt")
+def push_stock_events_mqtt(
+    hours: int = typer.Option(1, "--hours", help="Zeitraum rückwärts für Bestands-Events."),
+    debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
+) -> None:
+    """
+    Liest abgeschlossene Lagerbewegungen und sendet Stock-Change-Events an MQTT.
+    """
+    api = get_api(debug_enabled=debug_flag)
+    mqtt_client = MqttClient()
+    mqtt_client.connect()
+
+    now_utc = datetime.utcnow()
+    date_from = now_utc - timedelta(hours=hours)
+    date_from_str = date_from.strftime("%Y-%m-%d %H:%M:%S")
+
+    moves = api.search_read(
+        "stock.move",
+        [
+            ["state", "=", "done"],
+            ["date", ">=", date_from_str],
+        ],
+        ["id", "product_id", "product_uom_qty", "location_id", "location_dest_id", "date", "reference"],
+        limit=500,
+    )
+
+    ts = int(round(time.time() * 1000))
+
+    for mv in moves:
+        prod = mv.get("product_id") or [None, ""]
+        loc_from = mv.get("location_id") or [None, ""]
+        loc_to = mv.get("location_dest_id") or [None, ""]
+        event = {
+            "timestamp": ts,
+            "source": "odoo",
+            "event_type": "stock_change",
+            "entity": "stock.move",
+            "entity_id": mv["id"],
+            "data": {
+                "product_id": prod[0],
+                "product_name": prod[1],
+                "qty": float(mv.get("product_uom_qty", 0.0) or 0.0),
+                "location_from_id": loc_from[0],
+                "location_from_name": loc_from[1],
+                "location_to_id": loc_to[0],
+                "location_to_name": loc_to[1],
+                "date": mv.get("date"),
+                "reference": mv.get("reference"),
+            },
+        }
+        mqtt_client.publish_event(event)
+
+    info(f"Stock-Events für die letzten {hours} Stunden an MQTT gesendet.")
+
+@prozesse_app.command("push-delivery-events-mqtt")
+def push_delivery_events_mqtt(
+    hours: int = typer.Option(1, "--hours", help="Zeitraum rückwärts für Liefer-Events."),
+    debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
+) -> None:
+    """
+    Liest abgeschlossene Lieferungen (Warenausgänge) und sendet Delivery-Events an MQTT.
+    """
+    api = get_api(debug_enabled=debug_flag)
+    mqtt_client = MqttClient()
+    mqtt_client.connect()
+
+    now_utc = datetime.utcnow()
+    date_from = now_utc - timedelta(hours=hours)
+    date_from_str = date_from.strftime("%Y-%m-%d %H:%M:%S")
+
+    pickings = api.search_read(
+        "stock.picking",
+        [
+            ["state", "=", "done"],
+            ["picking_type_code", "=", "outgoing"],
+            ["date_done", ">=", date_from_str],
+        ],
+        ["id", "name", "origin", "date_done"],
+        limit=300,
+    )
+
+    ts = int(round(time.time() * 1000))
+
+    for pk in pickings:
+        event = {
+            "timestamp": ts,
+            "source": "odoo",
+            "event_type": "delivery_done",
+            "entity": "stock.picking",
+            "entity_id": pk["id"],
+            "data": {
+                "picking_name": pk.get("name"),
+                "origin": pk.get("origin"),  # meist Sales-Order-Name
+                "date_done": pk.get("date_done"),
+            },
+        }
+        mqtt_client.publish_event(event)
+
+    info(f"Delivery-Events für die letzten {hours} Stunden an MQTT gesendet.")
+
+# cli.py (Ausschnitt)
+@prozesse_app.command("demo-setup-reordering-rules")
+def demo_setup_reordering_rules(
+    debug_flag: bool = typer.Option(False, "--debug"),
+) -> None:
+    """
+    Legt einfache Reordering Rules für definierte Komponenten an
+    (Mindest- und Maximalbestand).
+    """
+    api = get_api(debug_enabled=debug_flag)
+
+    # Beispiel: Name -> (min_qty, max_qty)
+    rules_config = {
+        "EVO2 Akku": (10, 30),
+        "EVO2 Motor": (20, 60),
+        "EVO2 Propeller-Set": (50, 150),
+    }
+
+    # Standardlager (z. B. WH/Stock) holen
+    stock_locations = api.search_read(
+        "stock.location",
+        [["usage", "=", "internal"]],
+        ["id", "name"],
+        limit=1,
+    )
+    if not stock_locations:
+        raise RuntimeError("Kein interner Lagerort gefunden.")
+    location_id = stock_locations[0]["id"]
+
+    for prod_name, (min_qty, max_qty) in rules_config.items():
+        prods = api.search_read(
+            "product.product",
+            [["name", "=", prod_name]],
+            ["id", "name"],
+            limit=1,
+        )
+        if not prods:
+            info(f"Produkt für Reordering Rule nicht gefunden: {prod_name}")
+            continue
+        product_id = prods[0]["id"]
+
+        existing = api.search_read(
+            "stock.warehouse.orderpoint",
+            [["product_id", "=", product_id], ["location_id", "=", location_id]],
+            ["id"],
+            limit=1,
+        )
+        if existing:
+            op_id = existing[0]["id"]
+            api.write(
+                "stock.warehouse.orderpoint",
+                [op_id],
+                {"product_min_qty": min_qty, "product_max_qty": max_qty},
+            )
+            info(
+                f"Reordering Rule aktualisiert für {prod_name} "
+                f"(Min={min_qty}, Max={max_qty})."
+            )
+        else:
+            op_id = api.create(
+                "stock.warehouse.orderpoint",
+                {
+                    "product_id": product_id,
+                    "location_id": location_id,
+                    "product_min_qty": min_qty,
+                    "product_max_qty": max_qty,
+                },
+            )
+            info(
+                f"Reordering Rule angelegt für {prod_name} (ID {op_id}, "
+                f"Min={min_qty}, Max={max_qty})."
+            )
+
+    info("Demo-Reordering-Rules eingerichtet.")
+
+
+# cli.py (Ausschnitt)
+@prozesse_app.command("demo-purchase-flow")
+def demo_purchase_flow(
+    vendor_name: str = typer.Option("Drohnen GmbH Supplier", "--vendor"),
+    product_name: str = typer.Option("EVO2 Akku", "--product"),
+    qty: float = typer.Option(50.0, "--qty"),
+    debug_flag: bool = typer.Option(False, "--debug"),
+) -> None:
+    """
+    Legt eine Demo-Bestellung (RFQ) an, bestätigt sie und bucht einen Wareneingang.
+    """
+    api = get_api(debug_enabled=debug_flag)
+
+    # 1) Lieferant suchen
+    vendors = api.search_read(
+        "res.partner",
+        [["name", "=", vendor_name]],
+        ["id", "name"],
+        limit=1,
+    )
+    if not vendors:
+        raise RuntimeError(f"Lieferant '{vendor_name}' nicht gefunden.")
+    vendor_id = vendors[0]["id"]
+
+    # 2) Produkt suchen
+    prods = api.search_read(
+        "product.product",
+        [["name", "=", product_name]],
+        ["id", "name", "standard_price"],
+        limit=1,
+    )
+    if not prods:
+        raise RuntimeError(f"Produkt '{product_name}' nicht gefunden.")
+    prod = prods[0]
+    product_id = prod["id"]
+    price_unit = float(prod.get("standard_price", 0.0) or 0.0)
+
+    info(
+        f"Demo-Purchase: Lieferant={vendor_name} (ID {vendor_id}), "
+        f"Produkt={prod['name']} (ID {product_id}), Menge={qty}, Preis={price_unit}."
+    )
+
+    # 3) RFQ (Purchase Order) anlegen
+    po_id = api.create(
+        "purchase.order",
+        {
+            "partner_id": vendor_id,
+            "order_line": [
+                (
+                    0,
+                    0,
+                    {
+                        "product_id": product_id,
+                        "name": prod["name"],
+                        "product_qty": qty,
+                        "price_unit": price_unit,
+                    },
+                )
+            ],
+        },
+    )
+    info(f"RFQ/Purchase Order angelegt (ID {po_id}).")
+
+    # 4) Bestellung bestätigen
+    api.call_method("purchase.order", "button_confirm", [po_id])
+    info(f"Purchase Order {po_id} bestätigt.")
+
+    # 5) Wareneingangs-Picking finden
+    pickings = api.search_read(
+        "stock.picking",
+        [
+            ["origin", "=", f"PO{po_id}"],  # je nach Version ggf. anders (Name lesen)
+            ["picking_type_code", "=", "incoming"],
+        ],
+        ["id", "name", "state"],
+        limit=10,
+    )
+    if not pickings:
+        info(
+            "Kein Wareneingangs-Picking gefunden. "
+            "Ggf. über purchase.order.name statt PO-ID filtern."
+        )
+        return
+
+    for pk in pickings:
+        info(f"Wareneingang gefunden: {pk['name']} (ID {pk['id']}), Status={pk['state']}")
+
+    # Für Demo: ersten Wareneingang komplett als erhalten buchen
+    picking_id = pickings[0]["id"]
+
+    # 5a) Verfügbarkeit prüfen / reservieren (nicht immer nötig bei incoming)
+    api.call_method("stock.picking", "action_assign", [picking_id])
+
+    # 5b) Alle Move Lines auf qty_done setzen (vereinfachte Variante)
+    move_lines = api.search_read(
+        "stock.move.line",
+        [["picking_id", "=", picking_id]],
+        ["id", "product_uom_qty", "qty_done"],
+        limit=500,
+    )
+    for ml in move_lines:
+        planned = float(ml.get("product_uom_qty", 0.0) or 0.0)
+        api.write(
+            "stock.move.line",
+            [ml["id"]],
+            {"qty_done": planned},
+        )
+
+    # 5c) Wareneingang validieren
+    api.call_method("stock.picking", "button_validate", [picking_id])
+    info(f"Wareneingang {picking_id} als 'done' verbucht.")
+
+    info("Demo-Purchase-Flow abgeschlossen.")
 
 # ============================================================================
 # Test- und Demo-Skripte
