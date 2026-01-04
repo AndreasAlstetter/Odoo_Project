@@ -18,16 +18,15 @@ Top-Level-Gruppierungen:
 - prozesse: End-to-End-Geschäftsprozesse (Sales, Purchase, Manufacturing, Inventory, Shipping, Produktion, End-to-End + UMH)
 - tests: Test- und Demo-Skripte (End-to-End-File-Demo usw.)
 """
-from __future__ import annotations
 
-from typing import Optional
-import os
+
 
 import typer
+
+import datetime
 import time
 
-
-from config import ODOO_URL, DB_NAME, LOGIN, UMH_MASTERDATA_EXPORT_FILE, UMH_EVENTS_ENDTOEND_FILE, DATA_DIR, MQTT_BASE_TOPIC, MQTT_EVENTS_TOPIC
+from config import ODOO_URL, DB_NAME, LOGIN, UMH_MASTERDATA_EXPORT_FILE, UMH_EVENTS_ENDTOEND_FILE, DATA_DIR, MQTT_BASE_TOPIC
 from core import info, success, warning, error, debug
 from odoo_api import OdooAPI
 
@@ -61,10 +60,6 @@ from kpi.kpi_extractor import KpiExtractor
 from messaging.mqtt_client import MqttClient
 
 from core.logging_utils import info
-
-from datetime import datetime
-
-from integration.umh_mapping import enrich_event_with_uns
 
 # Zentrale Typer-App
 app = typer.Typer(help="Odoo-Drohnen-Projekt: Komplettaufbau & Validierung")
@@ -436,6 +431,56 @@ def setup_users_roles(
         error(f"Fehler beim Benutzer-/Rollen-Setup: {exc}")
         raise typer.Exit(code=1)
     
+
+@stammdaten_app.command("import-all")
+def import_all_masterdata(
+    variant: str = typer.Option(
+        "spartan",
+        "--variant",
+        "-v",
+        case_sensitive=False,
+        help="Drohnenvariante: spartan | lightweight | balance.",
+    ),
+    debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
+) -> None:
+    """
+    Importiert alle wesentlichen Stammdaten:
+    Lieferanten, Kunden, Produkte, BoMs (einfach/strukturiert), Lagerbestände,
+    Workcenter und Reordering-Regeln.
+    """
+    variant = variant.lower().strip()
+    if variant not in ("spartan", "lightweight", "balance"):
+        error("Ungültige Variante. Erlaubt sind: spartan, lightweight, balance.")
+        raise typer.Exit(code=1)
+
+    info(f"Starte Masterdaten-Import für Variante '{variant}'...")
+    api = get_api(debug_enabled=debug_flag)
+
+    SupplierImporter(api).import_suppliers()
+    CustomerImporter(api).import_customers()
+    try:
+        from importers.product_importer import ProductImporter
+        ProductImporter(api).import_products()
+    except Exception:
+        warning("Produktimporter nicht verfügbar oder Fehler – bitte prüfen.")
+
+    BOMImporter(api).import_variant(variant)
+    try:
+        StructuredBOMImporter(api).import_eigenfertigung_boms(variant)
+    except AttributeError:
+        warning(
+            "StructuredBOMImporter.import_eigenfertigung_boms nicht vorhanden – strukturierte BoMs werden übersprungen."
+        )
+
+    StockImporter(api).import_quantities()
+    WorkcenterImporter(api).import_workcenters()
+    try:
+        ReorderingRulesImporter(api).import_from_csv(REORDERING_CSV_PATH)
+    except Exception:
+        warning("Reordering-Regeln konnten nicht importiert werden – config/CSV prüfen.")
+
+    success(f"Masterdaten-Import für Variante '{variant}' abgeschlossen.")
+
 # ============================================================================
 # High-Level-Szenario: setup-all
 # ============================================================================
@@ -541,196 +586,6 @@ def demo_sales(
         error(f"Fehler in demo-sales: {exc}")
         raise typer.Exit(code=1)
 
-# integration/umh_mapping.py
-from typing import Dict, Any, Optional
-
-
-LOCATION_TO_UNS: Dict[str, str] = {
-    "WH/Stock": "ttz-leipheim/warehouse/main",
-    "WH/Incoming": "ttz-leipheim/warehouse/inbound",
-    "WH/Production": "ttz-leipheim/production/buffer",
-}
-
-WORKCENTER_TO_UNS: Dict[str, str] = {
-    "3D Drucker": "ttz-leipheim/assembly_1/3d_printer",
-    "Lasercutter": "ttz-leipheim/assembly_1/laser",
-    "Montage": "ttz-leipheim/assembly_2/assembly",
-    "Qualität": "ttz-leipheim/quality/station_1",
-}
-
-PRODUCT_TO_UNS: Dict[str, str] = {
-    "EVO2 Spartan Drohne": "ttz-leipheim/product/evo2_spartan",
-    "EVO2 Lightweight Drohne": "ttz-leipheim/product/evo2_lightweight",
-    "EVO2 Balance Drohne": "ttz-leipheim/product/evo2_balance",
-}
-
-
-def map_location_to_uns(location_name: str) -> str:
-    return LOCATION_TO_UNS.get(location_name, f"ttz-leipheim/location/{location_name}")
-
-
-def map_workcenter_to_uns(workcenter_name: str) -> str:
-    return WORKCENTER_TO_UNS.get(workcenter_name, f"ttz-leipheim/workcenter/{workcenter_name}")
-
-
-def map_product_to_uns(product_name: str) -> str:
-    return PRODUCT_TO_UNS.get(product_name, f"ttz-leipheim/product/{product_name}")
-
-
-def enrich_event_with_uns(event: Dict[str, Any]) -> Dict[str, Any]:
-    data = dict(event.get("data") or {})
-
-    prod_name: Optional[str] = data.get("product_name")
-    if prod_name:
-        data["product_uns"] = map_product_to_uns(prod_name)
-
-    loc_from_name: Optional[str] = data.get("location_from_name")
-    if loc_from_name:
-        data["location_from_uns"] = map_location_to_uns(loc_from_name)
-
-    loc_to_name: Optional[str] = data.get("location_to_name")
-    if loc_to_name:
-        data["location_to_uns"] = map_location_to_uns(loc_to_name)
-
-    event["data"] = data
-    return event
-
-@prozesse_app.command("demo-manufacturing-flow")
-def demo_manufacturing_flow(
-    so_name: str = typer.Option(
-        "", "--so-name", help="Name des vorhandenen Verkaufsauftrags (z. B. SO0001)."
-    ),
-    debug_flag: bool = typer.Option(False, "--debug"),
-) -> None:
-    """
-    Simuliert einen einfachen Fertigungsablauf:
-    - findet MOs zum Sales Order
-    - reserviert Material
-    - markiert Workorders/MO als fertig (vereinfachte Variante)
-    - erzeugt und erledigt eine Lieferung.
-    """
-    api = get_api(debug_enabled=debug_flag)
-
-    # 1) Falls SO-Name leer: letzten bestätigten Auftrag holen
-    if not so_name:
-        orders = api.search_read(
-            "sale.order",
-            [["state", "=", "sale"]],
-            ["id", "name", "date_order"],
-            limit=1,
-        )
-        if not orders:
-            raise RuntimeError("Kein bestätigter Verkaufsauftrag gefunden.")
-        so_name = orders[0]["name"]
-        info(f"Verwende letzten bestätigten Auftrag: {so_name}")
-
-    # 2) Zugehörige MOs finden
-    mos = api.search_read(
-        "mrp.production",
-        [["origin", "=", so_name]],
-        ["id", "name", "product_id", "product_qty", "state"],
-        limit=10,
-    )
-    if not mos:
-        raise RuntimeError(f"Keine Manufacturing Orders zu {so_name} gefunden.")
-
-    info(f"Gefundene MOs zu {so_name}:")
-    for mo in mos:
-        prod = mo.get("product_id") or [None, ""]
-        info(
-            f"  MO {mo['name']} (ID {mo['id']}), Produkt={prod[1]}, "
-            f"Menge={mo['product_qty']}, Status={mo['state']}"
-        )
-
-    # MQTT-Client optional nutzen, um Events mitzuschicken
-    mqtt_client = MqttClient()
-    mqtt_client.connect()
-    ts = int(round(time.time() * 1000))
-
-    # 3) Für jeden MO: Material reservieren und Produktion „durchspielen“
-    for mo in mos:
-        mo_id = mo["id"]
-        mo_name = mo["name"]
-        prod = mo.get("product_id") or [None, ""]
-        qty = float(mo.get("product_qty", 0.0) or 0.0)
-
-        info(f"Verarbeite MO {mo_name} (ID {mo_id}).")
-
-        # a) Komponenten reservieren
-        api.call_method("mrp.production", "action_assign", [mo_id])
-        info(f"  Material für MO {mo_name} reserviert.")
-
-        # b) Produktion starten
-        api.call_method("mrp.production", "button_mark_done", [mo_id])
-        info(f"  MO {mo_name} als 'done' markiert.")
-
-        # c) MQTT-Event für Fertigmeldung senden
-        event = {
-            "timestamp": ts,
-            "source": "odoo",
-            "event_type": "mo_demo_finished",
-            "entity": "mrp.production",
-            "entity_id": mo_id,
-            "data": {
-                "mo_id": mo_id,
-                "mo_name": mo_name,
-                "product_id": prod[0],
-                "product_name": prod[1],
-                "qty": qty,
-                "finished_at": datetime.utcnow().isoformat(),
-            },
-        }
-        event = enrich_event_with_uns(event)
-        mqtt_client.publish_event(event)
-
-    # kurze Pause, damit Lagerbewegungen/Verfügbarkeiten in Odoo nachziehen
-    time.sleep(1.0)
-
-    # 4) Lieferungen (Warenausgang) zum Auftrag finden und erledigen
-    pickings = api.search_read(
-        "stock.picking",
-        [
-            ["origin", "=", so_name],
-            ["picking_type_code", "=", "outgoing"],
-        ],
-        ["id", "name", "state"],
-        limit=10,
-    )
-    if not pickings:
-        info(f"Keine Lieferungen zum Auftrag {so_name} gefunden.")
-        return
-
-    info(f"Gefundene Lieferungen zu {so_name}:")
-    for pk in pickings:
-        info(f"  Picking {pk['name']} (ID {pk['id']}), Status={pk['state']}")
-
-    for pk in pickings:
-        if pk["state"] in ("done", "cancel"):
-            continue
-
-        picking_id = pk["id"]
-        # a) Verfügbarkeit prüfen / reservieren
-        api.call_method("stock.picking", "action_assign", [picking_id])
-        # b) Alles als geliefert markieren (vereinfachte Demo)
-        api.call_method("stock.picking", "button_validate", [picking_id])
-        info(f"  Lieferung {pk['name']} (ID {picking_id}) als 'done' verbucht.")
-
-        # c) MQTT-Event für Lieferung schicken
-        event = {
-            "timestamp": ts,
-            "source": "odoo",
-            "event_type": "delivery_demo_done",
-            "entity": "stock.picking",
-            "entity_id": picking_id,
-            "data": {
-                "picking_name": pk["name"],
-                "origin": so_name,
-                "date_done": datetime.utcnow().isoformat(),
-            },
-        }
-        mqtt_client.publish_event(event)
-
-    info("Demo-Manufacturing-Flow abgeschlossen.")
 
 
 @prozesse_app.command("export-umh-masterdata")
@@ -1212,7 +1067,7 @@ def push_mo_events_mqtt(
     mqtt_client.connect()
 
     now_utc = datetime.utcnow()
-    date_from = now_utc - timedelta(hours=hours)
+    date_from = now_utc - datetime.timedelta(hours=hours)
     date_from_str = date_from.strftime("%Y-%m-%d %H:%M:%S")
 
     # MOs im relevanten Zeitraum holen (vereinfachte Filterung über date_finished/date_planned_start)
@@ -1286,7 +1141,7 @@ def push_stock_events_mqtt(
     mqtt_client.connect()
 
     now_utc = datetime.utcnow()
-    date_from = now_utc - timedelta(hours=hours)
+    date_from = now_utc - datetime.timedelta(hours=hours)
     date_from_str = date_from.strftime("%Y-%m-%d %H:%M:%S")
 
     moves = api.search_read(
@@ -1340,7 +1195,7 @@ def push_delivery_events_mqtt(
     mqtt_client.connect()
 
     now_utc = datetime.utcnow()
-    date_from = now_utc - timedelta(hours=hours)
+    date_from = now_utc - datetime.timedelta(hours=hours)
     date_from_str = date_from.strftime("%Y-%m-%d %H:%M:%S")
 
     pickings = api.search_read(
@@ -1373,195 +1228,68 @@ def push_delivery_events_mqtt(
 
     info(f"Delivery-Events für die letzten {hours} Stunden an MQTT gesendet.")
 
-# cli.py (Ausschnitt)
-@prozesse_app.command("demo-setup-reordering-rules")
-def demo_setup_reordering_rules(
-    debug_flag: bool = typer.Option(False, "--debug"),
+@prozesse_app.command("export-all-analytics")
+def export_all_analytics(
+    days: int = typer.Option(7, "--days", help="Zeitraum für zeitbasierte KPIs."),
+    debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
 ) -> None:
     """
-    Legt einfache Reordering Rules für definierte Komponenten an
-    (Mindest- und Maximalbestand).
+    Führt alle Analytics-/Export-Schritte aus:
+    - UMH-Masterdaten
+    - End-to-End-Demo mit UMH-Events
+    - KPI-Export auf MQTT
     """
-    api = get_api(debug_enabled=debug_flag)
+    get_api(debug_enabled=debug_flag)
 
-    # Beispiel: Name -> (min_qty, max_qty)
-    rules_config = {
-        "EVO2 Akku": (10, 30),
-        "EVO2 Motor": (20, 60),
-        "EVO2 Propeller-Set": (50, 150),
-    }
+    info("==> Export UMH-Masterdaten")
+    cli_export_umh_masterdata(debug_flag=debug_flag)
 
-    # Standardlager (z. B. WH/Stock) holen
-    stock_locations = api.search_read(
-        "stock.location",
-        [["usage", "=", "internal"]],
-        ["id", "name"],
-        limit=1,
-    )
-    if not stock_locations:
-        raise RuntimeError("Kein interner Lagerort gefunden.")
-    location_id = stock_locations[0]["id"]
+    info("==> End-to-End-Demo mit UMH-Events")
+    demo_endtoend(debug_flag=debug_flag)
 
-    for prod_name, (min_qty, max_qty) in rules_config.items():
-        prods = api.search_read(
-            "product.product",
-            [["name", "=", prod_name]],
-            ["id", "name"],
-            limit=1,
-        )
-        if not prods:
-            info(f"Produkt für Reordering Rule nicht gefunden: {prod_name}")
-            continue
-        product_id = prods[0]["id"]
+    info("==> KPI-Export auf MQTT")
+    push_kpis_mqtt(days=days, debug_flag=debug_flag)
 
-        existing = api.search_read(
-            "stock.warehouse.orderpoint",
-            [["product_id", "=", product_id], ["location_id", "=", location_id]],
-            ["id"],
-            limit=1,
-        )
-        if existing:
-            op_id = existing[0]["id"]
-            api.write(
-                "stock.warehouse.orderpoint",
-                [op_id],
-                {"product_min_qty": min_qty, "product_max_qty": max_qty},
-            )
-            info(
-                f"Reordering Rule aktualisiert für {prod_name} "
-                f"(Min={min_qty}, Max={max_qty})."
-            )
-        else:
-            op_id = api.create(
-                "stock.warehouse.orderpoint",
-                {
-                    "product_id": product_id,
-                    "location_id": location_id,
-                    "product_min_qty": min_qty,
-                    "product_max_qty": max_qty,
-                },
-            )
-            info(
-                f"Reordering Rule angelegt für {prod_name} (ID {op_id}, "
-                f"Min={min_qty}, Max={max_qty})."
-            )
-
-    info("Demo-Reordering-Rules eingerichtet.")
+    success("export-all-analytics abgeschlossen.")
 
 
-# cli.py (Ausschnitt)
-@prozesse_app.command("demo-purchase-flow")
-def demo_purchase_flow(
-    vendor_name: str = typer.Option("Drohnen GmbH Supplier", "--vendor"),
-    product_name: str = typer.Option("EVO2 Akku", "--product"),
-    qty: float = typer.Option(50.0, "--qty"),
-    debug_flag: bool = typer.Option(False, "--debug"),
+@prozesse_app.command("demo-all")
+def demo_all(
+    include_purchase: bool = typer.Option(True, "--purchase/--no-purchase"),
+    include_inventory: bool = typer.Option(True, "--inventory/--no-inventory"),
+    include_shipping: bool = typer.Option(True, "--shipping/--no-shipping"),
+    debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
 ) -> None:
     """
-    Legt eine Demo-Bestellung (RFQ) an, bestätigt sie und bucht einen Wareneingang.
+    Führt alle Kernprozesse als Demos aus:
+    Sales → Manufacturing → (optional) Purchase → Inventory → Shipping.
     """
     api = get_api(debug_enabled=debug_flag)
+    sales = SalesFlow(api)
+    manuf = ManufacturingFlow(api)
+    purch = PurchaseFlow(api)
+    inv = InventoryFlow(api)
+    ship = ShippingFlow(api)
 
-    # 1) Lieferant suchen
-    vendors = api.search_read(
-        "res.partner",
-        [["name", "=", vendor_name]],
-        ["id", "name"],
-        limit=1,
-    )
-    if not vendors:
-        raise RuntimeError(f"Lieferant '{vendor_name}' nicht gefunden.")
-    vendor_id = vendors[0]["id"]
+    info("==> Sales-Demo (Angebot → Auftrag)")
+    orders = sales.run_demo_quotes_to_orders()
 
-    # 2) Produkt suchen
-    prods = api.search_read(
-        "product.product",
-        [["name", "=", product_name]],
-        ["id", "name", "standard_price"],
-        limit=1,
-    )
-    if not prods:
-        raise RuntimeError(f"Produkt '{product_name}' nicht gefunden.")
-    prod = prods[0]
-    product_id = prod["id"]
-    price_unit = float(prod.get("standard_price", 0.0) or 0.0)
+    info("==> Manufacturing-Demo (Auftrag → MOs → Fertigmeldung)")
+    manuf.run_demo_mo_chain(orders)
 
-    info(
-        f"Demo-Purchase: Lieferant={vendor_name} (ID {vendor_id}), "
-        f"Produkt={prod['name']} (ID {product_id}), Menge={qty}, Preis={price_unit}."
-    )
+    if include_purchase:
+        info("==> Purchase-Demo (RFQ → Bestellung → Wareneingang)")
+        purch.run_demo_purchasing()
 
-    # 3) RFQ (Purchase Order) anlegen
-    po_id = api.create(
-        "purchase.order",
-        {
-            "partner_id": vendor_id,
-            "order_line": [
-                (
-                    0,
-                    0,
-                    {
-                        "product_id": product_id,
-                        "name": prod["name"],
-                        "product_qty": qty,
-                        "price_unit": price_unit,
-                    },
-                )
-            ],
-        },
-    )
-    info(f"RFQ/Purchase Order angelegt (ID {po_id}).")
+    if include_inventory:
+        info("==> Inventory-Demo (Inventur + Ausschuss)")
+        inv.run_demo_inventory_and_scrap()
 
-    # 4) Bestellung bestätigen
-    api.call_method("purchase.order", "button_confirm", [po_id])
-    info(f"Purchase Order {po_id} bestätigt.")
+    if include_shipping:
+        info("==> Shipping-Demo (Lieferungen aus Aufträgen)")
+        ship.run_demo_shipping(orders)
 
-    # 5) Wareneingangs-Picking finden
-    pickings = api.search_read(
-        "stock.picking",
-        [
-            ["origin", "=", f"PO{po_id}"],  # je nach Version ggf. anders (Name lesen)
-            ["picking_type_code", "=", "incoming"],
-        ],
-        ["id", "name", "state"],
-        limit=10,
-    )
-    if not pickings:
-        info(
-            "Kein Wareneingangs-Picking gefunden. "
-            "Ggf. über purchase.order.name statt PO-ID filtern."
-        )
-        return
-
-    for pk in pickings:
-        info(f"Wareneingang gefunden: {pk['name']} (ID {pk['id']}), Status={pk['state']}")
-
-    # Für Demo: ersten Wareneingang komplett als erhalten buchen
-    picking_id = pickings[0]["id"]
-
-    # 5a) Verfügbarkeit prüfen / reservieren (nicht immer nötig bei incoming)
-    api.call_method("stock.picking", "action_assign", [picking_id])
-
-    # 5b) Alle Move Lines auf qty_done setzen (vereinfachte Variante)
-    move_lines = api.search_read(
-        "stock.move.line",
-        [["picking_id", "=", picking_id]],
-        ["id", "product_uom_qty", "qty_done"],
-        limit=500,
-    )
-    for ml in move_lines:
-        planned = float(ml.get("product_uom_qty", 0.0) or 0.0)
-        api.write(
-            "stock.move.line",
-            [ml["id"]],
-            {"qty_done": planned},
-        )
-
-    # 5c) Wareneingang validieren
-    api.call_method("stock.picking", "button_validate", [picking_id])
-    info(f"Wareneingang {picking_id} als 'done' verbucht.")
-
-    info("Demo-Purchase-Flow abgeschlossen.")
+    success("demo-all: Alle ausgewählten Prozess-Demos erfolgreich durchlaufen.")
 
 # ============================================================================
 # Test- und Demo-Skripte

@@ -78,6 +78,7 @@ SONSTIGE_DIR = os.path.join(DOMAIN_DATA_DIR, "sonstige_stammdaten")
 UMH_EVENTS_ENDTOEND_FILE = os.path.join(UMH_DATA_DIR, "umh_events_endtoend.json")
 UMH_MASTERDATA_EXPORT_FILE = os.path.join(EXPORT_DIR, "umh_masterdata.json")
 UMH_EVENTS_PRODUCTION_FILE = os.path.join(UMH_DATA_DIR, "umh_events_production.json")
+UMH_STOCK_EVENTS_FILE = os.path.join(UMH_DATA_DIR, "umh_stock_events.json")
 
 # Produktnamen für Varianten
 PRODUCT_SPARTAN_NAME = "EVO2 Spartan Drohne"

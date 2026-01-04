@@ -107,7 +107,17 @@ class SalesFlow:
         Führt alle drei Szenarien aus und gibt die Auftrags-IDs zurück.
         """
         orders: List[int] = []
-        orders.append(self.scenario_standard_order())
-        orders.append(self.scenario_discount_order())
-        orders.append(self.scenario_bulk_order())
+
+        for scenario in [
+            self.scenario_standard_order,
+            self.scenario_discount_order,
+            self.scenario_bulk_order,
+        ]:
+            try:
+                orders.append(scenario())
+            except RuntimeError as exc:
+                # Kunde/Produkt nicht gefunden usw.
+                from core import warning
+                warning(f"Sales-Demo-Szenario übersprungen: {exc}")
+
         return orders

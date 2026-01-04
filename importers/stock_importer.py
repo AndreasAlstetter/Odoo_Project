@@ -19,8 +19,9 @@ import math
 from typing import List, Dict
 
 import pandas as pd
+from pathlib import Path
 
-from config import LAGER_CSV_PATH
+from config import LAGER_CSV_PATH, UMH_STOCK_EVENTS_FILE
 from odoo_api import OdooAPI
 from integration.umh_events import UMHEventManager
 from integration.umh_client_sim import UMHClientSimulator
@@ -42,7 +43,7 @@ class StockImporter:
         """
         self.api = api
         self.umh_manager = UMHEventManager()
-        self.umh_client = UMHClientSimulator(output_file="umh_stock_events.json")
+        self.umh_client = UMHClientSimulator(output_file=Path(UMH_STOCK_EVENTS_FILE))
 
     def _load_df(self) -> pd.DataFrame:
         """

@@ -1,0 +1,14 @@
+# Python-Umgebungen
+venv/
+.env/
+.env*/
+
+# __pycache__ etc.
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# VSCode / IDE
+.vscode/
+.idea/
