@@ -1,4 +1,4 @@
 name,street,zip,city,country,email,phone,vat,is_company
 Demo Kunde GmbH,Musterstraße 1,86150,Augsburg,DE,info@demo-kunde.de,+49 821 123456,DE123456788,1
-NextLap AG,Industriestraße 5,89312,Günzburg,DE,info@nextlap.de,+49 8221 987654,,1
 Max Mustermann,Beispielweg 7,86150,Augsburg,DE,max.mustermann@example.com,+49 821 111222,,0
+Demo Privatkunde,Privatstraße 3,86150,Augsburg,DE,andreas.alstetter@hs-augsburg.de,+49 821 333444,,0

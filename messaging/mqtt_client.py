@@ -13,7 +13,7 @@ from config import (
     MQTT_USERNAME,
     MQTT_PASSWORD,
     MQTT_BASE_TOPIC,
-    MQTT_EVENTS_TOPIC,
+    MQTT_KPI_EVENTS_TOPIC,
 )
 from core.logging_utils import info, warning
 
@@ -50,7 +50,7 @@ class MqttClient:
 
     def publish_event(self, event: Dict[str, Any]) -> None:
         """Prozess-Event an MQTT_EVENTS_TOPIC senden."""
-        topic = MQTT_EVENTS_TOPIC.strip("/")
+        topic = MQTT_KPI_EVENTS_TOPIC.strip("/")
         msg = json.dumps(event, default=str, separators=(",", ":"))
         result = self._client.publish(topic, msg, qos=0, retain=False)
         status = result[0]

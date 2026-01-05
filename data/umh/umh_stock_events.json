@@ -1,0 +1,209 @@
+[
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.215512",
+    "payload": {
+      "product_id": 1,
+      "location_id": 1,
+      "qty_change": 1000.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.273394",
+    "payload": {
+      "product_id": 3,
+      "location_id": 1,
+      "qty_change": 99.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.326737",
+    "payload": {
+      "product_id": 4,
+      "location_id": 1,
+      "qty_change": 99.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.436346",
+    "payload": {
+      "product_id": 5,
+      "location_id": 1,
+      "qty_change": 12.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.490457",
+    "payload": {
+      "product_id": 7,
+      "location_id": 1,
+      "qty_change": 16.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.547443",
+    "payload": {
+      "product_id": 8,
+      "location_id": 1,
+      "qty_change": 58.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.601324",
+    "payload": {
+      "product_id": 9,
+      "location_id": 1,
+      "qty_change": 10.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.651079",
+    "payload": {
+      "product_id": 10,
+      "location_id": 1,
+      "qty_change": 57.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.710581",
+    "payload": {
+      "product_id": 11,
+      "location_id": 1,
+      "qty_change": 49.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.761154",
+    "payload": {
+      "product_id": 12,
+      "location_id": 1,
+      "qty_change": 1.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.813251",
+    "payload": {
+      "product_id": 13,
+      "location_id": 1,
+      "qty_change": 8.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.868056",
+    "payload": {
+      "product_id": 14,
+      "location_id": 1,
+      "qty_change": 10.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.922834",
+    "payload": {
+      "product_id": 15,
+      "location_id": 1,
+      "qty_change": 35.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:39.974617",
+    "payload": {
+      "product_id": 23,
+      "location_id": 1,
+      "qty_change": 7.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:40.021259",
+    "payload": {
+      "product_id": 26,
+      "location_id": 1,
+      "qty_change": 3.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:40.082790",
+    "payload": {
+      "product_id": 37,
+      "location_id": 1,
+      "qty_change": 26.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:40.139089",
+    "payload": {
+      "product_id": 53,
+      "location_id": 1,
+      "qty_change": 4.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:40.193333",
+    "payload": {
+      "product_id": 55,
+      "location_id": 1,
+      "qty_change": 3.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:40.239109",
+    "payload": {
+      "product_id": 60,
+      "location_id": 1,
+      "qty_change": 36.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:40.297609",
+    "payload": {
+      "product_id": 61,
+      "location_id": 1,
+      "qty_change": 1.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:40.350180",
+    "payload": {
+      "product_id": 62,
+      "location_id": 1,
+      "qty_change": 2.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:40.399011",
+    "payload": {
+      "product_id": 70,
+      "location_id": 1,
+      "qty_change": 28.0
+    }
+  },
+  {
+    "type": "stock_change",
+    "timestamp": "2026-01-04T11:20:40.458883",
+    "payload": {
+      "product_id": 71,
+      "location_id": 1,
+      "qty_change": 25.0
+    }
+  }
+]

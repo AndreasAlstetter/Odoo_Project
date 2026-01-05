@@ -124,10 +124,15 @@ MQTT_BROKER_PORT = int(os.getenv("MQTT_BROKER_PORT", "8883"))
 MQTT_USERNAME = os.getenv("MQTT_USERNAME", "mqtt_digital_twin_tests")
 MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "4v3h7Gzau§g=")
 
+# Status-Topic für Odoo → UMH
+MQTT_STATUS_TOPIC = "ttz-leipheim/odoo/status/data"
+
 
 # Basis-Topic für KPI-Daten
 MQTT_BASE_TOPIC = os.getenv("MQTT_BASE_TOPIC", "ttz-leipheim/odoo/kpi/data")
 
 
-# Event-Topic für Odoo → UMH
-MQTT_EVENTS_TOPIC = "ttz-leipheim/odoo/events"
+# KPI-Event-Topic für Odoo → UMH
+MQTT_KPI_EVENTS_TOPIC = "ttz-leipheim/odoo/events"
+
+

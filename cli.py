@@ -23,10 +23,13 @@ Top-Level-Gruppierungen:
 
 import typer
 
+import random
+import json
+
 import datetime
 import time
 
-from config import ODOO_URL, DB_NAME, LOGIN, UMH_MASTERDATA_EXPORT_FILE, UMH_EVENTS_ENDTOEND_FILE, DATA_DIR, MQTT_BASE_TOPIC
+from config import ODOO_URL, DB_NAME, LOGIN, UMH_MASTERDATA_EXPORT_FILE, UMH_EVENTS_ENDTOEND_FILE, MQTT_STATUS_TOPIC
 from core import info, success, warning, error, debug
 from odoo_api import OdooAPI
 
@@ -1290,6 +1293,72 @@ def demo_all(
         ship.run_demo_shipping(orders)
 
     success("demo-all: Alle ausgewählten Prozess-Demos erfolgreich durchlaufen.")
+
+@prozesse_app.command("simulate-company-status")
+def simulate_company_status(
+    sleep_min: float = typer.Option(
+        1.0, "--sleep-min", help="Minimale Wartezeit zwischen zwei Statusmeldungen (Sekunden)."
+    ),
+    sleep_max: float = typer.Option(
+        5.0, "--sleep-max", help="Maximale Wartezeit zwischen zwei Statusmeldungen (Sekunden)."
+    ),
+    debug_flag: bool = typer.Option(
+        False, "--debug", help="Detailierte Debug-Ausgaben aktivieren."
+    ),
+) -> None:
+    """
+    Simuliert den Unternehmensstatus durch zufällige Statusmeldungen
+    (SUCCESS, ERROR, NACHARBEIT) und sendet diese in einer Schleife
+    an den MQTT-Broker auf das Topic ttz-leipheim/odoo/status/data.
+    """
+    mqtt_client = MqttClient()
+    mqtt_client.connect()
+
+    info(
+        "Starte Status-Simulation: Messages an "
+        f"{MQTT_STATUS_TOPIC} (Ctrl+C zum Abbrechen)."
+    )
+
+    statuses = [
+        ("SUCCESS", "Vorgang erfolgreich abgeschlossen."),
+        ("ERROR", "Fehler im Prozess – Eingriff erforderlich."),
+        ("NACHARBEIT", "Nacharbeit / Rework notwendig."),
+    ]
+
+    try:
+        while True:
+            status, description = random.choice(statuses)
+            ts = int(round(time.time() * 1000))
+
+            payload = {
+                "timestamp": ts,
+                "source": "odoo",
+                "event_type": "company_status",
+                "topic": MQTT_STATUS_TOPIC,
+                "status": status,
+                "message": description,
+            }
+
+            # Direktes Publish auf das Status-Topic, unabhängig von MQTT_BASE_TOPIC
+            msg = json.dumps(payload, default=str, separators=(",", ":"))
+            result = mqtt_client._client.publish(
+                MQTT_STATUS_TOPIC.strip("/"), msg, qos=0, retain=False
+            )
+            rc = result[0]
+
+            if rc != 0:
+                warning(
+                    f"MQTT-Publish auf Status-Topic {MQTT_STATUS_TOPIC} fehlgeschlagen "
+                    f"(Status {rc})."
+                )
+            else:
+                info(f"Status-Event gesendet: {payload}")
+
+            wait = random.uniform(sleep_min, sleep_max)
+            time.sleep(wait)
+
+    except KeyboardInterrupt:
+        info("Status-Simulation durch Benutzer abgebrochen.")
 
 # ============================================================================
 # Test- und Demo-Skripte
