@@ -14,6 +14,25 @@ OUTPUT_DIR = Path("docs/uml")
 
 
 def generate_endtoend_puml(variant: VariantName) -> Path:
+    """
+    Generates an End-to-End PlantUML diagram for the given variant.
+
+    The resulting PlantUML file will be saved in the "docs/uml" directory.
+
+    The diagram will contain the following elements:
+
+    * Actors: Kunde, Sales, Purchase, Stock, MRP, SFS
+    * Use cases:
+        + Kundenauftrag
+        +Einkauf/Wareneingang
+        +Fertigung mit Routing
+        +QS und Lieferung
+
+    :param variant: the name of the variant to generate the diagram for
+    :type variant: VariantName
+    :return: the path to the generated PlantUML file
+    :rtype: Path
+    """
     ops = get_routing(variant)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUTPUT_DIR / f"endtoend_{variant}.puml"
@@ -70,6 +89,10 @@ def generate_endtoend_puml(variant: VariantName) -> Path:
 
 
 def generate_all() -> None:
+    """
+    Generate all end-to-end diagrams for all variants.
+    """
+
     for variant in ("spartan", "balance", "lightweight"):
         generate_endtoend_puml(variant)  # type: ignore[arg-type]
 

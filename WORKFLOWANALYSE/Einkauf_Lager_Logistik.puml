@@ -1,0 +1,25 @@
+@startuml
+participant "Planung & MRP" as MRP
+participant Einkauf
+participant Lieferant
+participant Lager
+
+MRP -> Einkauf : Bedarf Kaufteile
+Einkauf -> Lager : Bestandsprüfung Min/Max
+alt Bestand genug
+  Einkauf -> MRP : Kein Einkauf nötig
+else Bestand zu gering
+  Einkauf -> Lieferant : RFQ senden
+  Lieferant -> Einkauf : Angebot / Auftragsbestätigung
+  Einkauf -> Lieferant : Bestellung bestätigen
+end
+Lieferant -> Lager : Waren liefern
+Lager -> Lager : Wareneingang buchen\n& Bestand aktualisieren
+Lager -> Lager : Material einlagern\n(WH/Produktion/Versand)
+Lager -> Lager : Kanban prüfen (PLA, Platten, Elektronik)
+alt Kanban leer
+  Lager -> Einkauf : Reordering-Workflow starten
+else Kanban ok
+  Lager -> Produktion : Material für Produktion bereitstellen
+end
+@enduml

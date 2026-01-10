@@ -1,0 +1,116 @@
+@startuml
+title End-to-End Workflow Drohnenprojekt (Odoo + Produktion)
+
+|Kunde / Vertrieb|
+start
+:Kundenbedarf erfassen;
+:Variante wählen\n(spartan / lightweight / balanced);
+:Angebot in Odoo erstellen;
+if (Kunde akzeptiert Angebot?) then (ja)
+  :Verkaufsauftrag bestätigen;
+else (nein)
+  stop
+endif
+
+|Planung & MRP|
+:MRP-Lauf / Beschaffungsplanung starten;
+fork
+  :Beschaffungsbedarf für Kaufteile ermitteln;
+fork again
+  :Fertigungsaufträge (MOs) für Drohnen\nund Baugruppen erzeugen;
+end fork
+
+|Einkauf / Lieferanten|
+if (Bestand >= Min/Max laut\nReordering Rules?) then (genug)
+  :Kein Einkauf nötig;
+else (zu wenig)
+  :RFQ an Lieferanten senden;
+  :Bestellung bestätigen;
+endif
+:Wareneingang buchen;
+:Lagerbestand aktualisieren;
+
+|Lager & Logistik|
+:Material einlagern\n(WH / Produktion / Versand);
+:Kanban-Bestände prüfen\n(PLA, Platten, Elektronik);
+if (Kanban leer?) then (ja)
+  :Reordering-Workflow anstoßen\n(demo-reordering-purchase);
+else (nein)
+  :Material für Produktion bereitstellen;
+endif
+
+|Produktion klassisch|
+:Lasercutter-Batch planen\n(Plattenzuschnitt, Setup 1-3x/Tag);
+:Lasern der Grundplatten;
+:3D-Druckteile einplanen\n(Füße, Haube, Grundplatte);
+if (Nachtstrom verfügbar?) then (ja)
+  :3D-Drucke in Nacht verschieben;
+else (nein)
+  :3D-Druck sofort starten;
+endif
+:3D-gedruckte Teile entnehmen\nund in Puffer legen;
+
+|Montagezelle AMR/SCARA/NEXTLAP|
+:AMR fährt zu WH-Placement-Position;
+:QR10 platziert Palette im WH;
+:AMR fährt zur SCARA-Position;
+
+:Variante wählen;
+fork
+    [Variante = spartan?] :SCARA platziert Füße SPARTAN;
+fork again
+    [Variante = lightweight?] :SCARA platziert Füße LIGHTWEIGHT;
+fork again
+    [Variante = balanced?] :SCARA platziert Füße BALANCED;
+end fork
+
+
+:AMR fährt zur NEXTLAP-Station;
+:WORKER pickt & platziert Platte;
+:WORKER pickt & platziert Case;
+:WORKER pickt & platziert Akku\n+ Akkukabel;
+:WORKER pickt & platziert Motoren;
+:WORKER pickt & platziert RFID-Tag;
+:WORKER pickt & platziert Empfänger\n+ Empfängerkabel;
+:WORKER pickt & platziert Nieten;
+:WORKER pickt & platziert Controller;
+
+
+|Produktion klassisch|
+:Elektronik bestücken / löten;
+:Flashen der Controller;
+:Endmontage Gehäuse + Rotoren;
+:Fertigmeldung im MO buchen;
+
+|Qualität & Traceability|
+:In-Prozess-Prüfung Füße / Gehäuse;
+:Endprüfung Drohne;
+if (OK?) then (ja)
+  :Seriennummer / RFID in Odoo\nper TraceabilityManager zuordnen;
+else (NOK)
+  :Nacharbeit einplanen\n(Nacharbeits-Arbeitsplätze);
+  :Ausschuss buchen (Inventur & Scrap);
+endif
+
+|Lager & Logistik|
+:Verfügbare fertige Drohnen\nim Versandlager buchen;
+
+|Kunde / Vertrieb|
+:Lieferauftrag aus Verkaufsauftrag erzeugen;
+:Kommissionierung & Verpackung;
+:Warenausgang buchen;
+:Rechnung erzeugen und versenden;
+
+|Controlling / Sustainability / Digital Twin|
+:Smart-Meter- und IoT-Daten sammeln\n(kWh, kg Material, Verschnitt, PV-Erzeugung);
+:UMH-Masterdaten & Events exportieren;
+:KPIs & CO2 je Produkt berechnen\n(OEE, Zykluszeit, Scrap, Energie);
+if (Optimierungspotenzial?) then (ja)
+  :Kanban-Bestände dynamisch anpassen;
+  :Batchgrößen Lasercutter optimieren;
+  :3D-Druck-Last zwischen Tag/Nacht verschieben;
+  :Lieferantenmix anpassen\n(lokal vs. global);
+endif
+
+stop
+@enduml

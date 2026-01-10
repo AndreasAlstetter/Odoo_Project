@@ -14,6 +14,11 @@ OUTPUT_DIR = Path("docs/uml")
 
 
 def generate_sequence_puml(variant: VariantName) -> Path:
+    """Erstellt ein UML-Sequenzdiagramm für einen Produktionsablauf der EVO2-Produktion.
+
+    Das Diagramm enthält die Hauptrollen "Kunde", "Odoo MRP" und "Shopfloor-Steuerung".
+    Es wird der Ablauf der Produktion dargestellt, indem die Hauptrollen miteinander interagieren.
+    """
     ops = get_routing(variant)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUTPUT_DIR / f"production_sequence_{variant}.puml"
@@ -53,6 +58,9 @@ def generate_sequence_puml(variant: VariantName) -> Path:
 
 
 def generate_all_variants() -> None:
+    """
+    Erstellt PlantUML-Sequenzdiagramme fr alle Varianten.
+    """
     for variant in ("spartan", "balance", "lightweight"):
         generate_sequence_puml(variant)  # type: ignore[arg-type]
 

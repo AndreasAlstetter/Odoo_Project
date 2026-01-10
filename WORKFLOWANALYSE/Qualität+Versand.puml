@@ -1,0 +1,35 @@
+@startuml
+participant "Produktion klassisch" as Prod
+participant "Qualität & Traceability" as QA
+participant Odoo
+participant "Lager / Versand" as Ship
+participant Kunde
+participant "Controlling / Digital Twin" as Ctrl
+
+Prod -> QA : Fertige Drohne zur Prüfung
+QA -> QA : In-Prozess-Prüfung\n& Endprüfung
+alt OK
+  QA -> Odoo : Seriennummer/RFID\nper TraceabilityManager buchen
+else NOK
+  QA -> Prod : Nacharbeit anfordern
+  QA -> Odoo : Ausschuss buchen
+end
+
+QA -> Ship : Freigegebene Drohne an Versandlager
+Ship -> Ship : Bestand im Versandlager buchen
+
+Odoo -> Ship : Lieferauftrag erzeugen
+Ship -> Ship : Kommissionierung & Verpackung
+Ship -> Kunde : Warenausgang / Lieferung
+Odoo -> Kunde : Rechnung senden
+
+Ctrl -> Odoo : UMH-Masterdaten & Events abrufen
+Ctrl -> Ctrl : Smart-Meter- & IoT-Daten sammeln\n(kWh, Material, Verschnitt, PV)
+Ctrl -> Ctrl : KPIs & CO2 je Produkt berechnen
+alt Optimierungspotenzial
+  Ctrl -> Lager : Kanban-Bestände anpassen
+  Ctrl -> Prod : Batchgrößen Lasercutter optimieren
+  Ctrl -> Prod : 3D-Druck Tag/Nacht shiften
+  Ctrl -> Einkauf : Lieferantenmix anpassen
+end
+@enduml

@@ -1,0 +1,15 @@
+@startuml
+title Odoo Programmablauf - Drohnenprojekt
+
+start
+
+:Kundenbedarf erfassen;
+:Verkaufsangebot in Odoo anlegen;
+:Verkaufsauftrag bestätigen;
+:MRP / Fertigungsaufträge planen;
+:Montage & Test auf dem Shopfloor;
+:Warenausgang buchen;
+:Lieferung an Kunden verbuchen;
+
+stop
+@enduml

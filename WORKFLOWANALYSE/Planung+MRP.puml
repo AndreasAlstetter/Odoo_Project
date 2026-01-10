@@ -1,0 +1,16 @@
+@startuml
+participant "Vertrieb / Odoo" as Odoo
+participant "Planung & MRP" as MRP
+participant "Produktion" as Prod
+participant "Einkauf" as Purchase
+
+Odoo -> MRP : Verkaufsauftrag\n& Bedarf übergeben
+MRP -> MRP : MRP-Lauf starten
+
+par Kaufteile
+  MRP -> Purchase : Beschaffungsbedarf Kaufteile\n(RFQ/Bestellvorschlag)
+else Fertigungsteile
+  MRP -> Prod : Fertigungsaufträge (MOs)\nfür Drohnen & Baugruppen
+end
+
+@enduml
