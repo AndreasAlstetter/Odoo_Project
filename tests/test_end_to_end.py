@@ -1,78 +1,27 @@
 # tests/test_end_to_end.py
 
-"""
-End-to-End-Demo-Skript (kein klassischer Unit-Test).
+import unittest
 
-Führt exemplarisch folgende Schritte aus:
-- Odoo-Verbindung aufbauen.
-- BoMs und Lieferanten importieren.
-- Platzhalter: Prozess-Demos (Sales, Purchase, Manufacturing, Inventory, Shipping).
-- UMH-Events erzeugen und nach JSON exportieren.
-"""
+from odoo_api import OdooAPI
+from endtoend.run import run_endtoend_demo
 
-import json
 
-from ..odoo_api import OdooAPI
-from ..importers.bom_importer import BOMImporter
-from ..importers.structured_bom_importer import StructuredBOMImporter
-from ..importers.supplier_importer import SupplierImporter
-from ..processes.sales_flow import SalesFlow
-from ..processes.purchase_flow import PurchaseFlow
-from ..processes.manufacturing_flow import ManufacturingFlow
-from ..processes.shipping_flow import ShippingFlow
-from ..processes.inventory_flow import InventoryFlow
-from ..integration.umh_events import UMHEventManager, EventType
-from ..integration.umh_client_sim import UMHClientSimulator
+class TestEndToEndDemo(unittest.TestCase):
+    """End-to-End-Demo: nur Smoke- / Integrations-Test, keine Detail-Logik."""
 
-from config import UMH_EVENTS_ENDTOEND_FILE
-EVENT_FILE = UMH_EVENTS_ENDTOEND_FILE
+    def test_endtoend_smoke(self) -> None:
+        api = OdooAPI()
+        result = run_endtoend_demo(api)
 
-def main() -> None:
-    # 1) Odoo-Verbindung
-    api = OdooAPI()
+        orders = result.get("orders", [])
+        mos = result.get("manufacturing_orders", [])
+        events_count = result.get("umh_events_count", 0)
 
-    # 2) Stammdaten / BoMs / Lieferanten
-    bom_importer = BOMImporter(api)
-    for variant in ("spartan", "lightweight", "balance"):
-        bom_importer.import_variant(variant)
-
-    structured_importer = StructuredBOMImporter(api)
-    for variant in ("spartan", "lightweight", "balance"):
-        structured_importer.import_eigenfertigung_boms(variant)
-
-    supplier_importer = SupplierImporter(api)
-    supplier_importer.import_suppliers()
-
-    # 3) Prozess-Demos (optional, je nach verfügbarer Demo-Datenbank)
-    sales = SalesFlow(api)
-    purchase = PurchaseFlow(api)
-    mfg = ManufacturingFlow(api)
-    shipping = ShippingFlow(api)
-    inventory = InventoryFlow(api)
-
-    # Beispiel: einfacher Durchlauf, Fehler werden nur geloggt
-    order_ids = sales.run_demo_quotes_to_orders()
-    po_ids = purchase.run_demo_purchasing()
-    mo_ids = mfg.run_demo_mo_chain(order_ids)
-    shipping.run_demo_shipping(order_ids)
-    inventory.run_demo_inventory_and_scrap()
-
-    # 4) UMH-Events sammeln (vereinfachtes Beispiel)
-    umh_manager = UMHEventManager()
-    umh_manager.queue_event(umh_manager.create_mo_event(mo_id=1, event_type=EventType.MO_STARTED))
-    umh_manager.queue_event(umh_manager.create_mo_event(mo_id=1, event_type=EventType.MO_COMPLETED))
-    umh_manager.queue_event(umh_manager.create_stock_event(product_id=1, location_id=1, qty_change=10.0))
-    umh_manager.queue_event(umh_manager.create_shipping_event(delivery_id=1))
-
-    events = [e.to_dict() for e in umh_manager.get_pending_events()]
-
-    UMHClientSimulator(output_file=EVENT_FILE).send_events_batch(events)
-
-    with open(EVENT_FILE, "w", encoding="utf-8") as f:
-        json.dump(events, f, ensure_ascii=False, indent=2)
-
-    print(f"End-to-end Demo fertig. Events in {EVENT_FILE} geschrieben.")
-
+        # Sehr einfache Integrations-Assertions:
+        self.assertGreaterEqual(len(orders), 1, "Mindestens ein Verkaufsauftrag erwartet.")
+        self.assertGreaterEqual(len(mos), 1, "Mindestens ein Fertigungsauftrag erwartet.")
+        self.assertGreater(events_count, 0, "Es sollten UMH-Events erzeugt worden sein.")
+        
 
 if __name__ == "__main__":
-    main()
+    unittest.main()

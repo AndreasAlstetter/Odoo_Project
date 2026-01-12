@@ -1,5 +1,0 @@
-product_id,pricelist_name,currency,price
-DRONE-V1,Sales Pricelist,EUR,500.00
-DRONE-V2,Sales Pricelist,EUR,650.00
-DRONE-V1,Retail Pricelist,EUR,550.00
-DRONE-V2,Retail Pricelist,EUR,700.00

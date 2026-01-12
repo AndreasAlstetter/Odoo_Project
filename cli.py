@@ -62,7 +62,11 @@ from processes.traceability import TraceabilityManager
 from kpi.kpi_extractor import KpiExtractor
 from messaging.mqtt_client import MqttClient
 
-from core.logging_utils import info
+from core.logging_utils import info, success, error
+from endtoend.run import run_endtoend_demo
+
+from integration.umh_events import UMHEventManager, EventType
+from integration.umh_client_mqtt import UMHMqttClient
 
 # Zentrale Typer-App
 app = typer.Typer(help="Odoo-Drohnen-Projekt: Komplettaufbau & Validierung")
@@ -703,48 +707,17 @@ def demo_shipping(
 def demo_endtoend(
     debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
 ) -> None:
-    """
-    End-to-End-Demo: Verkauf → Fertigung → Einkauf → Inventur/Ausschuss → Versand → UMH-Events.
-    """
-    api = get_api(debug_enabled=debug_flag)
-
-    sales = SalesFlow(api)
-    manuf = ManufacturingFlow(api)
-    purch = PurchaseFlow(api)
-    inv = InventoryFlow(api)
-    ship = ShippingFlow(api)
-
-    umh_mgr = UMHEventManager()
-    umh_client = UMHClientSimulator(output_file=UMH_EVENTS_ENDTOEND_FILE)
+    """End-to-End-Demo: Verkauf, Fertigung, Einkauf, Inventur/Ausschuss, Versand, UMH-Events."""
     try:
-        info("Starte End-to-End-Demo...")
-
-        # 1) Verkauf
-        orders = sales.run_demo_quotes_to_orders()
-
-        # 2) Fertigung
-        mo_ids = manuf.run_demo_mo_chain(orders)
-
-        # 3) Einkauf
-        purch.run_demo_purchasing()
-
-        # 4) Inventur & Ausschuss
-        inv.run_demo_inventory_and_scrap()
-
-        # 5) Versand
-        ship.run_demo_shipping(orders)
-
-        # 6) UMH-Events erzeugen (vereinfachtes Beispiel)
-        for mo_id in mo_ids:
-            evt = umh_mgr.create_mo_event(mo_id, EventType.MO_COMPLETED)
-            umh_mgr.queue_event(evt)
-
-        # Events in Datei „senden“
-        events_dicts = [e.to_dict() for e in umh_mgr.get_pending_events()]
-        umh_client.send_events_batch(events_dicts)
-        umh_client.export_to_file()
-
-        success("End-to-End-Demo inkl. UMH-Events (Datei umh_events_endtoend.json) abgeschlossen.")
+        api = get_api(debug_enabled=debug_flag)
+        info("Starte End-to-End-Demo über endtoend.run.run_endtoend_demo...")
+        result = run_endtoend_demo(api)
+        success(
+            f"End-to-End-Demo abgeschlossen "
+            f"({len(result.get('orders', []))} SOs, "
+            f"{len(result.get('manufacturing_orders', []))} MOs, "
+            f"{result.get('umh_events_count', 0)} UMH-Events)."
+        )
     except Exception as exc:
         error(f"Fehler in demo-endtoend: {exc}")
         raise typer.Exit(code=1)
@@ -1423,3 +1396,63 @@ def demo_endtoend_file(
     umh_client.export_to_file()
 
     success(f"End-to-End-Demo (Script-Variante) fertig. Events in {UMH_EVENTS_ENDTOEND_FILE} geschrieben.")
+
+# cli.py – zusätzlicher Befehl
+
+@tests_app.command("demo-endtoend-mqtt")
+def demo_endtoend_mqtt(
+    debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
+) -> None:
+    """
+    End-to-End-Demo (Sales → Manufacturing → Purchase → Inventory → Shipping)
+    und Versand der entstehenden UMH-Events per MQTT.
+    """
+    try:
+        # 1) Odoo-API aufbauen
+        api = get_api(debug_enabled=debug_flag)
+        info("Starte End-to-End-Demo mit UMH-Events über MQTT...")
+
+        # 2) Kernprozesse wie in demo_all
+        sales = SalesFlow(api)
+        manuf = ManufacturingFlow(api)
+        purch = PurchaseFlow(api)
+        inv = InventoryFlow(api)
+        ship = ShippingFlow(api)
+
+        info("==> Sales-Demo (Angebot → Auftrag)")
+        orders = sales.run_demo_quotes_to_orders()
+
+        info("==> Manufacturing-Demo (Auftrag → MOs → Fertigmeldung)")
+        manuf.run_demo_mo_chain(orders)
+
+        info("==> Purchase-Demo (RFQ → Bestellung → Wareneingang)")
+        purch.run_demo_purchasing()
+
+        info("==> Inventory-Demo (Inventur + Ausschuss)")
+        inv.run_demo_inventory_and_scrap()
+
+        info("==> Shipping-Demo (Lieferungen aus Aufträgen)")
+        ship.run_demo_shipping(orders)
+
+        # 3) UMH-Events sammeln (Platzhalter – später aus den Flows speisen)
+        umh_manager = UMHEventManager()
+        umh_manager.queue_event(
+            umh_manager.create_mo_event(mo_id=1, event_type=EventType.MO_STARTED)
+        )
+        umh_manager.queue_event(
+            umh_manager.create_mo_event(mo_id=1, event_type=EventType.MO_COMPLETED)
+        )
+
+        events = umh_manager.get_pending_events()
+        if not events:
+            warning("Keine UMH-Events für MQTT vorhanden.")
+            return
+
+        # 4) MQTT-Client verbinden und Events senden
+        client = UMHMqttClient()
+        client.send_events_batch(events)
+
+        success(f"{len(events)} UMH-Events per MQTT gesendet.")
+    except Exception as exc:
+        error(f"Fehler in demo-endtoend-mqtt: {exc}")
+        raise typer.Exit(code=1)

@@ -1,23 +1,32 @@
 [
   {
-    "type": "mo_completed",
-    "timestamp": "2026-01-02T18:25:03.243835",
+    "type": "mo_started",
+    "timestamp": "2026-01-12T17:10:09.402653",
     "payload": {
-      "mo_id": 76
+      "mo_id": 1
     }
   },
   {
     "type": "mo_completed",
-    "timestamp": "2026-01-02T18:25:03.243835",
+    "timestamp": "2026-01-12T17:10:09.402653",
     "payload": {
-      "mo_id": 77
+      "mo_id": 1
     }
   },
   {
-    "type": "mo_completed",
-    "timestamp": "2026-01-02T18:25:03.243835",
+    "type": "stock_change",
+    "timestamp": "2026-01-12T17:10:09.402653",
     "payload": {
-      "mo_id": 78
+      "product_id": 1,
+      "location_id": 1,
+      "qty_change": 10.0
+    }
+  },
+  {
+    "type": "delivery_shipped",
+    "timestamp": "2026-01-12T17:10:09.403643",
+    "payload": {
+      "delivery_id": 1
     }
   }
 ]

@@ -80,10 +80,12 @@ UMH_MASTERDATA_EXPORT_FILE = os.path.join(EXPORT_DIR, "umh_masterdata.json")
 UMH_EVENTS_PRODUCTION_FILE = os.path.join(UMH_DATA_DIR, "umh_events_production.json")
 UMH_STOCK_EVENTS_FILE = os.path.join(UMH_DATA_DIR, "umh_stock_events.json")
 
-# Produktnamen für Varianten
+# ---------------- Produktnamen für Varianten ----------------
+
 PRODUCT_SPARTAN_NAME = "EVO2 Spartan Drohne"
 PRODUCT_LIGHTWEIGHT_NAME = "EVO2 Lightweight Drohne"
 PRODUCT_BALANCE_NAME = "EVO2 Balance Drohne"
+
 
 if not (ODOO_URL and DB_NAME and LOGIN and API_KEY):
     raise RuntimeError("Bitte ODOO_URL, DB_NAME, LOGIN, API_KEY in .env setzen.")

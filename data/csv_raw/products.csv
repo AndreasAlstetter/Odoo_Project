@@ -1,6 +1,0 @@
-product_id,name,type,default_code,supplier_id,cost
-P001,Motor Component,product,MC-001,S001,15.00
-P002,Rotor Blade,product,RB-001,S002,8.50
-P003,Battery Cell,product,BC-001,S003,12.00
-DRONE-V1,Drone Variant 1,product,DRONE-V1,S001,350.00
-DRONE-V2,Drone Variant 2,product,DRONE-V2,S002,450.00

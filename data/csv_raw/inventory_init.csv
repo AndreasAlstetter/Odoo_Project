@@ -1,7 +1,0 @@
-location_id,product_id,quantity_on_hand,quantity_reserved
-LOC-IN,P001,0,0
-LOC-IN,P002,0,0
-LOC-IN,P003,0,0
-LOC-MAIN,P001,100,0
-LOC-MAIN,P002,150,0
-LOC-MAIN,P003,120,0

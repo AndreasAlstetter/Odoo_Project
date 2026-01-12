@@ -1,4 +1,0 @@
-product_id,minimum_qty,qty_multiple,purchase_qty,lead_time_days
-P001,50,10,100,5
-P002,100,20,200,7
-P003,80,15,150,10
