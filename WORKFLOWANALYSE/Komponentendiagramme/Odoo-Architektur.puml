@@ -1,0 +1,24 @@
+@startuml
+package "Odoo ERP" {
+  [Sales]
+  [Purchase]
+  [Inventory]
+  [Manufacturing]
+  [Quality]
+  [Accounting]
+  [Integration/UMH-Connector]
+}
+
+[Shopfloor/Drohnenfabrik]
+[UMH / Digital Twin]
+[Energie / Smart Meter]
+
+[Sales] --> [Manufacturing] : SO -> MOs
+[Manufacturing] --> [Inventory] : Materialbedarf / Rückmeldungen
+[Purchase] --> [Inventory] : Wareneingänge
+[Inventory] --> [Quality] : Prüfungen
+[Inventory] --> [Accounting] : Bewertung
+[Integration/UMH-Connector] --> [UMH / Digital Twin] : Events, Masterdaten
+[Manufacturing] --> [Shopfloor/Drohnenfabrik] : Produktionsaufträge
+[Energie / Smart Meter] --> [Integration/UMH-Connector] : Verbrauchsdaten
+@enduml

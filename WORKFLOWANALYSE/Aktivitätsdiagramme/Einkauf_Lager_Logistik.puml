@@ -1,0 +1,33 @@
+@startuml
+title Einkauf, Lager, Logistik – Beschaffung & Nachschub
+
+|Planung & MRP|
+start
+:Beschaffungsvorschläge für Kaufteile;
+
+|Einkauf|
+:RFQ für Lieferant erzeugen;
+:Preis & Liefertermin verhandeln;
+:Bestellung in Odoo bestätigen;
+
+|Lieferant|
+:Ware liefern;
+
+|Lager|
+:Wareneingang prüfen (Menge, Qualität);
+:Wareneingang in Odoo buchen;
+:Lagerbestand aktualisieren;
+:Material auf Lager- und Kanbanplätze verteilen;
+
+:Kanban-Bestand prüfen;
+if (Kanban leer?) then (ja)
+  :Nachschubauftrag auslösen (Reordering / interne Umlagerung);
+else (nein)
+  :Bestand nur protokollieren;
+endif
+
+:Material für Produktion kommissionieren;
+:Transfer ins Produktionslager buchen;
+
+stop
+@enduml

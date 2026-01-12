@@ -1,0 +1,69 @@
+@startuml
+title End-to-End Workflow Drohnen GmbH (Odoo-ERP Sicht)
+
+|Kunde / Vertrieb|
+start
+:Kundenbedarf erfassen;
+:Angebot in Odoo erstellen;
+if (Kunde akzeptiert Angebot?) then (ja)
+  :Verkaufsauftrag in Odoo bestätigen;
+else (nein)
+  stop
+endif
+
+|Planung & MRP|
+:MRP-Lauf in Odoo starten;
+fork
+  :Bedarf Kaufteile ermitteln;
+fork again
+  :Fertigungsaufträge (MOs) für Drohnen erzeugen;
+end fork
+
+|Einkauf|
+:Lieferantenanfragen (RFQ) aus Bedarf erzeugen;
+:Bestellungen bestätigen;
+
+|Lager & Logistik|
+:Wareneingänge buchen;
+:Lagerbestand aktualisieren;
+:Material für Produktion bereitstellen;
+if (Kanban leer?) then (ja)
+  :Nachschubprozess anstoßen;
+endif
+
+
+|Montagezelle AMR/SCARA/NEXTLAP|
+:Material aus Lager an Zelle bringen;
+:Variante wählen (spartan/lightweight/balanced);
+:SCARA platziert Varianten-spezifische Teile;
+:Worker führt Pick & Place der restlichen Komponenten aus;
+
+
+|Produktion klassisch|
+:MO starten (Lasern, 3D-Druck, Mechanik);
+:Elektronik bestücken und löten;
+:Controller flashen;
+:Endmontage Gehäuse + Rotoren;
+:MO in Odoo fertigmelden;
+
+
+|Qualität & Versand|
+:In-Prozess- und Endprüfung durchführen;
+if (Qualität OK?) then (ja)
+  :Seriennummer/RFID in Odoo zuordnen;
+  :Lieferauftrag aus Verkaufsauftrag erstellen;
+  :Kommissionierung & Verpackung;
+  :Lieferung (Warenausgang) buchen;
+else (NOK)
+  :Nacharbeit / Ausschuss in Odoo buchen;
+endif
+
+|Controlling / UMH|
+:Produktions- und Bestandsdaten aus Odoo auslesen;
+:UMH-Events erzeugen (stock_change, mo_started, mo_completed, delivery_shipped, quality_check);
+:KPIs & CO2 je Produkt berechnen;
+
+|Kunde / Vertrieb|
+:Rechnung erzeugen und versenden;
+stop
+@enduml

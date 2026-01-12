@@ -1,0 +1,226 @@
+@startuml
+title Domänenmodell Drohnen GmbH – Odoo + UMH
+
+' === Kundenaufträge (Sales) ===
+class SaleOrder {
+  +id: int
+  +name: string        ' SO-Nummer
+  +date_order: datetime
+  +state: string       ' draft, sale, done, cancel
+  +partner_id: int     ' Kunde
+}
+
+class SaleOrderLine {
+  +id: int
+  +order_id: int
+  +product_id: int
+  +product_uom_qty: float
+  +price_unit: float
+  +state: string
+}
+
+class ResPartner {
+  +id: int
+  +name: string
+  +email: string
+  +phone: string
+  +customer_rank: int
+  +supplier_rank: int
+}
+
+SaleOrder "1" -- "many" SaleOrderLine
+SaleOrderLine "many" --> "1" Product
+SaleOrder "many" --> "1" ResPartner : customer
+
+' === Produkte, BoMs, Routing ===
+class Product {
+  +id: int
+  +name: string
+  +default_code: string
+  +type: string        ' product, consu, service
+  +uom_id: int
+}
+
+class MrpBom {
+  +id: int
+  +product_tmpl_id: int
+  +product_id: int
+  +product_qty: float
+  +type: string        ' normal, phantom, ...
+}
+
+class MrpBomLine {
+  +id: int
+  +bom_id: int
+  +product_id: int
+  +product_qty: float
+}
+
+Product "1" -- "0..1" MrpBom : Haupt-BoM
+MrpBom "1" -- "many" MrpBomLine
+MrpBomLine "many" --> "1" Product : Komponente
+
+' === Beschaffung (Purchase) ===
+class PurchaseOrder {
+  +id: int
+  +name: string
+  +date_order: datetime
+  +partner_id: int     ' Lieferant
+  +state: string       ' draft, sent, purchase, done
+}
+
+class PurchaseOrderLine {
+  +id: int
+  +order_id: int
+  +product_id: int
+  +product_qty: float
+  +price_unit: float
+}
+
+PurchaseOrder "1" -- "many" PurchaseOrderLine
+PurchaseOrder "many" --> "1" ResPartner : vendor
+PurchaseOrderLine "many" --> "1" Product
+
+' === Fertigung (Manufacturing) ===
+class MrpProduction {
+  +id: int
+  +name: string
+  +product_id: int
+  +product_qty: float
+  +qty_producing: float
+  +state: string        ' draft, confirmed, progress, done
+  +origin: string       ' Bezug auf SO
+}
+
+class MrpWorkorder {
+  +id: int
+  +production_id: int
+  +workcenter_id: int
+  +state: string        ' ready, progress, done
+  +duration_expected: float
+  +duration: float
+}
+
+class MrpWorkcenter {
+  +id: int
+  +name: string
+  +code: string
+}
+
+SaleOrder "0..1" --> "many" MrpProduction : erzeugt MOs
+MrpProduction "1" -- "many" MrpWorkorder
+MrpWorkorder "many" --> "1" MrpWorkcenter
+MrpProduction "many" --> "1" Product
+
+' === Lager, Bewegungen, Versand ===
+class StockLocation {
+  +id: int
+  +name: string
+  +usage: string        ' internal, supplier, customer, inventory
+}
+
+class StockPicking {
+  +id: int
+  +name: string
+  +picking_type_code: string  ' incoming, outgoing, internal
+  +origin: string             ' SO/PO/MO
+  +state: string              ' draft, assigned, done
+}
+
+class StockMove {
+  +id: int
+  +picking_id: int
+  +product_id: int
+  +location_id: int
+  +location_dest_id: int
+  +product_uom_qty: float
+  +state: string
+}
+
+StockPicking "1" -- "many" StockMove
+StockMove "many" --> "1" Product
+StockMove "many" --> "1" StockLocation : source
+StockMove "many" --> "1" StockLocation : dest
+
+SaleOrder "1" -- "many" StockPicking : outgoing deliveries
+PurchaseOrder "1" -- "many" StockPicking : incoming receipts
+MrpProduction "1" -- "many" StockPicking : intern/Produktion (optional)
+
+' === Inventur & Ausschuss ===
+class StockInventory {
+  +id: int
+  +name: string
+  +state: string         ' draft, in_progress, done
+}
+
+class StockInventoryLine {
+  +id: int
+  +inventory_id: int
+  +product_id: int
+  +location_id: int
+  +product_qty: float     ' gezählte Menge
+}
+
+class StockScrap {
+  +id: int
+  +product_id: int
+  +scrap_qty: float
+  +scrap_location_id: int
+  +state: string         ' draft, done
+}
+
+StockInventory "1" -- "many" StockInventoryLine
+StockInventoryLine "many" --> "1" Product
+StockInventoryLine "many" --> "1" StockLocation
+StockScrap "many" --> "1" Product
+StockScrap "many" --> "1" StockLocation : scrap_location
+
+' === Qualität & Traceability ===
+class QualityCheck {
+  +id: int
+  +product_id: int
+  +workorder_id: int
+  +picking_id: int
+  +stage: string
+  +result: string        ' pass, fail
+}
+
+class StockLot {
+  +id: int
+  +name: string          ' Serien-/Chargennummer
+  +product_id: int
+}
+
+QualityCheck "many" --> "1" Product
+QualityCheck "0..many" --> "0..1" MrpWorkorder
+QualityCheck "0..many" --> "0..1" StockPicking
+StockLot "many" --> "1" Product
+MrpProduction "many" --> "0..many" StockLot : erzeugt/verbaut SN
+
+' === UMH-Events & Mapping ===
+class UMHEvent {
+  +type: string          ' stock_change, mo_started, ...
+  +timestamp: datetime
+  +payload: dict
+}
+
+class UMHEventManager {
+  +events: List<UMHEvent>
+  +create_stock_event()
+  +create_mo_event()
+  +create_shipping_event()
+  +create_quality_event()
+  +queue_event()
+  +get_pending_events()
+  +clear_events()
+}
+
+UMHEventManager "1" -- "many" UMHEvent
+
+' logische Referenzen per Payload (IDs aus Odoo)
+UMHEvent ..> MrpProduction : mo_id in payload
+UMHEvent ..> StockPicking  : delivery_id in payload
+UMHEvent ..> Product       : product_id in payload
+UMHEvent ..> StockLocation : location_id in payload
+
+@enduml

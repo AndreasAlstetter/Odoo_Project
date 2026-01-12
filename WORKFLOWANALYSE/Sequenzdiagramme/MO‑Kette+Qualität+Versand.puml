@@ -1,0 +1,91 @@
+@startuml
+title MO-Kette, Qualität und Versand – detailliertes Sequenzdiagramm
+
+participant "MRP/Odoo\n(mrp.production)" as MRP
+participant "Produktion/Odoo\n(mrp.production + Work Orders)" as Prod
+participant "Qualität/Odoo\n(quality.check)" as QA
+participant "Lager/Versand\n(stock.picking)" as WH
+participant "UMH-Integration\n(UMHEventManager + Client)" as UMH
+
+== 1. MO-Anlage aus Planung ==
+MRP -> Prod : create(mrp.production)\nMO für Drohne/Variante anlegen
+note right of Prod
+  Felder: product_id, product_qty,
+  routing_id/Workcenter, origin=SO
+end note
+
+== 2. MO-Start & Materialbereitstellung ==
+Prod -> Prod : action_confirm(mrp.production)\nMO bestätigen
+Prod -> Prod : action_assign(mrp.production)\nMaterial reservieren
+Prod -> UMH : create_mo_event(mo_id, MO_STARTED)\nqueue_event
+note right of UMH
+  Event: type="mo_started",
+  payload={ mo_id }
+end note
+
+== 3. Ausführung der Work Orders ==
+activate Prod
+Prod -> Prod : Work Orders je Operation ausführen\n(Lasern, 3D-Druck, Montage)
+... optional: Zwischenprüfungen, Puffer ...
+
+== 4. Übergabe an Qualität ==
+Prod -> QA : Prüfling + Referenz auf MO übergeben
+activate QA
+
+QA -> QA : In-Prozess-Prüfung\n(Mechanik/Elektronik)
+QA -> QA : Endprüfung Drohne (Funktions-/Flugtest)
+
+alt Qualität OK
+  QA -> UMH : create_quality_event(product_id, "Endtest", "pass", details)\nqueue_event
+  note right of UMH
+    Event: type="quality_check",
+    payload={ product_id, stage, result, details? }
+  end note
+
+  QA -> Prod : Ergebnis OK
+  deactivate QA
+
+  == 5. MO-Fertigmeldung ==
+  Prod -> Prod : qty_producing setzen (optional)\nwrite(mrp.production)
+  Prod -> Prod : button_mark_done / action_finish\nMO fertigmelden
+  Prod -> UMH : create_mo_event(mo_id, MO_COMPLETED)\nqueue_event
+  note right of UMH
+    Event: type="mo_completed",
+    payload={ mo_id }
+  end note
+
+else Qualität NOK
+  QA -> UMH : create_quality_event(product_id, "Endtest", "fail", details)\nqueue_event
+  QA -> Prod : Ergebnis NOK
+  QA -> Prod : Nacharbeit / Ausschuss anstoßen
+  deactivate QA
+
+  Prod -> Prod : Nacharbeits-MO oder scrap\n(stock.scrap) anlegen
+  Prod -> UMH : create_mo_event(mo_id, MO_COMPLETED)\nqueue_event
+end
+deactivate Prod
+
+== 6. Umbuchung ins Versandlager ==
+Prod -> WH : Umbuchung fertige Drohne\n(stock.move / internal picking)
+WH -> UMH : create_stock_event(product_id, from_loc, -qty)\nqueue_event
+WH -> UMH : create_stock_event(product_id, to_loc, +qty)\nqueue_event
+note right of UMH
+  Events: type="stock_change",
+  payload={ product_id, location_id, qty_change }
+end note
+
+== 7. Versandabwicklung ==
+WH -> WH : Lieferauftrag aus SO verarbeiten\n(stock.picking outgoing)
+WH -> WH : button_validate(stock.picking)\nWarenausgang buchen
+WH -> UMH : create_shipping_event(delivery_id)\nqueue_event
+note right of UMH
+  Event: type="delivery_shipped",
+  payload={ delivery_id }
+end note
+
+== 8. Events an UMH senden ==
+UMH -> UMH : get_pending_events()\nEvents in Batch serialisieren
+UMH -> "UMH/Digital Twin" : Events per HTTP/MQTT senden
+UMH -> UMH : clear_events()
+
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+actor Kunde
+participant "Vertrieb / Odoo" as Sales
+participant "MRP" as MRP
+participant "Lager/Versand" as WH
+participant "Buchhaltung" as ACC
+
+Kunde -> Sales : Anfrage / Bedarf
+Sales -> Sales : Angebot erfassen
+Sales -> Kunde : Angebot senden
+Kunde -> Sales : Angebot akzeptieren
+
+Sales -> Sales : Sales Order (SO) anlegen
+Sales -> Sales : SO bestätigen
+
+Sales -> MRP : Bedarf aus SO übergeben
+Sales -> WH  : Lieferauftrag aus SO erzeugen
+Sales -> ACC : Rechnung aus SO erzeugen
+@enduml

@@ -1,0 +1,13 @@
+@startuml
+participant "Planung & MRP" as MRP
+participant "Einkauf / Odoo" as Purchase
+actor Lieferant
+participant "Lager / Odoo" as WH
+
+MRP -> Purchase : Beschaffungsvorschläge\nfür Kaufteile
+Purchase -> Purchase : RFQ anlegen
+Purchase -> Lieferant : Angebot/Bestellung senden
+Lieferant -> WH : Ware liefern
+WH -> WH : Wareneingang prüfen
+WH -> WH : Wareneingang buchen\nBestand aktualisieren
+@enduml

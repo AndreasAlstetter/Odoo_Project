@@ -1,0 +1,28 @@
+@startuml
+title Kunde / Vertrieb – Angebots- und Auftragsprozess
+
+|Kunde|
+start
+:Bedarf formulieren;
+
+|Vertrieb / Odoo|
+:Angebot erfassen (Produkt + Variante);
+:Preis & Lieferdatum kalkulieren;
+:Angebot in Odoo speichern;
+
+|Kunde|
+:Angebot prüfen;
+if (Angebot akzeptiert?) then (ja)
+
+  |Vertrieb / Odoo|
+  :Verkaufsauftrag aus Angebot erzeugen;
+  :Variante & Menge je Position festlegen;
+  :Auftrag bestätigen (Reservierung/Trigger für MRP);
+  stop
+else (nein)
+
+  |Vertrieb / Odoo|
+  :Angebot als verloren markieren;
+  stop
+endif
+@enduml

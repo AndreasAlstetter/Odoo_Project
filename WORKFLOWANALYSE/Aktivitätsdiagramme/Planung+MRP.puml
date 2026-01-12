@@ -1,0 +1,29 @@
+@startuml
+title Planung & MRP – Bedarfs- und Fertigungsplanung
+
+|Vertrieb / Odoo|
+start
+:Bestätigte Verkaufsaufträge vorhanden;
+
+|Planung & MRP|
+:MRP-Lauf starten (Periodenplanung);
+if (Auftrag Make-to-Order?) then (MTO)
+  :Direkten Bedarf aus SO übernehmen;
+else (MTS)
+  :Bedarf aus Sicherheitsbestand / Prognose übernehmen;
+endif
+
+fork
+  :Bedarf Kaufteile je Produkt berechnen;
+  if (Bestand >= Min/Max?) then (genug)
+    :Kein Einkaufsvorschlag nötig;
+  else (zu wenig)
+    :Beschaffungsvorschläge (RFQ/PO) erzeugen;
+  endif
+fork again
+  :Fertigungsbedarf je Drohnenvariante berechnen;
+  :Fertigungsaufträge (MOs) anlegen;
+end fork
+
+stop
+@enduml

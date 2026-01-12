@@ -1,0 +1,42 @@
+@startuml
+title Produktion, Qualität, Versand – Fertigung einer Drohne
+
+|Planung & MRP|
+start
+:Fertigungsaufträge (MOs) freigeben;
+
+|Produktion klassisch|
+:MO starten;
+:Lasern der Grundplatten;
+:3D-Druckteile einplanen/produzieren;
+:Elektronik bestücken;
+:Bauteile löten;
+:Controller flashen;
+:Mechanische Endmontage (Gehäuse + Rotoren);
+
+|Qualität|
+:In-Prozess-Prüfung (Mechanik/Elektronik);
+:Endprüfung Drohne;
+if (OK?) then (ja)
+  |Produktion klassisch|
+  :MO in Odoo fertigmelden;
+  |Qualität|
+  :Seriennummer/RFID in Odoo zuordnen;
+else (NOK)
+  |Qualität|
+  :Nacharbeit planen;
+  :Ausschuss/Nacharbeit in Odoo buchen;
+endif
+
+|Lager / Versand|
+:Fertige Drohne ins Versandlager umbuchen;
+:Lieferauftrag aus SO erzeugen;
+:Kommissionierung & Verpackung;
+:Lieferung (Warenausgang) buchen;
+
+|Controlling / UMH|
+:UMH-Events schreiben\n(stock_change, mo_started, mo_completed, quality_check, delivery_shipped);
+:KPIs aktualisieren;
+
+stop
+@enduml
