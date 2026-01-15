@@ -6,13 +6,13 @@ load_dotenv()
 
 # Odoo-Verbindungsdaten
 
-ODOO_URL = os.getenv("ODOO_URL", "https://190-stage.odoo.721739.d9tcloud.de/").rstrip("/")
+ODOO_URL = os.getenv("ODOO_URL").rstrip("/")
 
-DB_NAME = os.getenv("DB_NAME", "odoo.190-stage_testing")
+DB_NAME = os.getenv("DB_NAME")
 
-LOGIN = os.getenv("LOGIN", "felix.reich@tha.de")
+LOGIN = os.getenv("LOGIN")
 
-API_KEY = os.getenv("API_KEY", "51ba1fb1ab26c77d6368b055e9f1c34b02583600")
+API_KEY = os.getenv("API_KEY")
 
 # Projektwurzel
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -129,9 +129,8 @@ MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "4v3h7Gzau§g=")
 # Status-Topic für Odoo → UMH
 MQTT_STATUS_TOPIC = "ttz-leipheim/odoo/status/data"
 
-
 # Basis-Topic für KPI-Daten
-MQTT_BASE_TOPIC = os.getenv("MQTT_BASE_TOPIC", "ttz-leipheim/odoo/kpi/data")
+MQTT_BASE_TOPIC = "ttz-leipheim/odoo/kpi/data"
 
 
 # KPI-Event-Topic für Odoo → UMH

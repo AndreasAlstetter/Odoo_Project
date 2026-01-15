@@ -68,6 +68,10 @@ from endtoend.run import run_endtoend_demo
 from integration.umh_events import UMHEventManager, EventType
 from integration.umh_client_mqtt import UMHMqttClient
 
+from importers.bom_operation_importer import BomOperationImporter
+from importers.routing_importer import RoutingImporter
+
+
 # Zentrale Typer-App
 app = typer.Typer(help="Odoo-Drohnen-Projekt: Komplettaufbau & Validierung")
 
@@ -405,20 +409,19 @@ def setup_workcenters(
 
 @stammdaten_app.command("setup-routings")
 def setup_routings(
-    debug_flag: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
+    debug: bool = typer.Option(False, "--debug", help="Debug-Ausgaben aktivieren."),
 ) -> None:
     """
-    Legt Routings je Variante an (sofern das Modell in der Odoo-Version verfügbar ist).
-    """
-    info("Starte Einrichtung der Routings je Variante...")
-    api = get_api(debug_enabled=debug_flag)
-    importer = RoutingImporter(api)
-    try:
-        count = importer.import_routings()
-        success(f"Routing-Setup abgeschlossen. Varianten mit Routing: {count}.")
-    except Exception as exc:
-        warning(f"Routing-Setup übersprungen (Modell mrp.routing fehlt?): {exc}")
+    Legt Operationen/Routings je Drohnenvariante auf Basis von routings.csv an.
 
+    Für jede Variante (spartan, balance, lightweight) werden die in der CSV
+    definierten Arbeitsschritte als Operationen in Odoo angelegt.
+    """
+    api = get_api(debug_enabled=debug)
+
+    importer = RoutingImporter(api)
+    count = importer.import_routings()
+    success(f"Routing-/Operations-Import abgeschlossen. Varianten mit Operationen: {count}.")
 
 @stammdaten_app.command("setup-users-roles")
 def setup_users_roles(

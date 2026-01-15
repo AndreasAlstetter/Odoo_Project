@@ -1,7 +1,7 @@
 [
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.215512",
+    "timestamp": "2026-01-13T19:29:44.849344",
     "payload": {
       "product_id": 1,
       "location_id": 1,
@@ -10,7 +10,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.273394",
+    "timestamp": "2026-01-13T19:29:44.904241",
     "payload": {
       "product_id": 3,
       "location_id": 1,
@@ -19,7 +19,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.326737",
+    "timestamp": "2026-01-13T19:29:44.944599",
     "payload": {
       "product_id": 4,
       "location_id": 1,
@@ -28,7 +28,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.436346",
+    "timestamp": "2026-01-13T19:29:45.062915",
     "payload": {
       "product_id": 5,
       "location_id": 1,
@@ -37,7 +37,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.490457",
+    "timestamp": "2026-01-13T19:29:45.115045",
     "payload": {
       "product_id": 7,
       "location_id": 1,
@@ -46,7 +46,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.547443",
+    "timestamp": "2026-01-13T19:29:45.161018",
     "payload": {
       "product_id": 8,
       "location_id": 1,
@@ -55,7 +55,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.601324",
+    "timestamp": "2026-01-13T19:29:45.226897",
     "payload": {
       "product_id": 9,
       "location_id": 1,
@@ -64,7 +64,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.651079",
+    "timestamp": "2026-01-13T19:29:45.278890",
     "payload": {
       "product_id": 10,
       "location_id": 1,
@@ -73,7 +73,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.710581",
+    "timestamp": "2026-01-13T19:29:45.339973",
     "payload": {
       "product_id": 11,
       "location_id": 1,
@@ -82,7 +82,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.761154",
+    "timestamp": "2026-01-13T19:29:45.385513",
     "payload": {
       "product_id": 12,
       "location_id": 1,
@@ -91,7 +91,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.813251",
+    "timestamp": "2026-01-13T19:29:45.433971",
     "payload": {
       "product_id": 13,
       "location_id": 1,
@@ -100,7 +100,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.868056",
+    "timestamp": "2026-01-13T19:29:45.496788",
     "payload": {
       "product_id": 14,
       "location_id": 1,
@@ -109,7 +109,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.922834",
+    "timestamp": "2026-01-13T19:29:45.545085",
     "payload": {
       "product_id": 15,
       "location_id": 1,
@@ -118,7 +118,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:39.974617",
+    "timestamp": "2026-01-13T19:29:45.593856",
     "payload": {
       "product_id": 23,
       "location_id": 1,
@@ -127,7 +127,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:40.021259",
+    "timestamp": "2026-01-13T19:29:45.657285",
     "payload": {
       "product_id": 26,
       "location_id": 1,
@@ -136,7 +136,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:40.082790",
+    "timestamp": "2026-01-13T19:29:45.705907",
     "payload": {
       "product_id": 37,
       "location_id": 1,
@@ -145,7 +145,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:40.139089",
+    "timestamp": "2026-01-13T19:29:45.754432",
     "payload": {
       "product_id": 53,
       "location_id": 1,
@@ -154,7 +154,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:40.193333",
+    "timestamp": "2026-01-13T19:29:45.818546",
     "payload": {
       "product_id": 55,
       "location_id": 1,
@@ -163,7 +163,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:40.239109",
+    "timestamp": "2026-01-13T19:29:45.874889",
     "payload": {
       "product_id": 60,
       "location_id": 1,
@@ -172,7 +172,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:40.297609",
+    "timestamp": "2026-01-13T19:29:45.927338",
     "payload": {
       "product_id": 61,
       "location_id": 1,
@@ -181,7 +181,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:40.350180",
+    "timestamp": "2026-01-13T19:29:45.979489",
     "payload": {
       "product_id": 62,
       "location_id": 1,
@@ -190,7 +190,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:40.399011",
+    "timestamp": "2026-01-13T19:29:46.029263",
     "payload": {
       "product_id": 70,
       "location_id": 1,
@@ -199,7 +199,7 @@
   },
   {
     "type": "stock_change",
-    "timestamp": "2026-01-04T11:20:40.458883",
+    "timestamp": "2026-01-13T19:29:46.079761",
     "payload": {
       "product_id": 71,
       "location_id": 1,
